@@ -77,6 +77,11 @@ function TopHeader() {
     }
   };
 
+  useEffect(() => {
+    const title = getPageTitle();
+    document.title = title === "رفيق المؤمن" ? title : `${title} - رفيق المؤمن`;
+  }, [location]);
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 md:px-6">
       <SidebarTrigger className="md:flex" />
