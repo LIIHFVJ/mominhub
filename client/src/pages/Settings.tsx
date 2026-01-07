@@ -484,7 +484,7 @@ export default function Settings() {
                                             setPreferences(prev => ({
                                                 ...prev,
                                                 country: val,
-                                                city: countryData ? countryData.cities[0] : prev.city,
+                                                city: countryData ? countryData.cities[0].en : prev.city,
                                                 calculation_method: countryData?.defaultMethod || prev.calculation_method
                                             }));
                                         }}
@@ -520,7 +520,7 @@ export default function Settings() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {selectedCountryData.cities.map(city => (
-                                                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                                                        <SelectItem key={city.en} value={city.en}>{city.ar}</SelectItem>
                                                     ))}
                                                     <SelectItem value="manual" className="text-primary font-bold border-t">
                                                         إدخال مدينة أخرى...
@@ -533,8 +533,8 @@ export default function Settings() {
                                             <Input
                                                 value={preferences.city}
                                                 onChange={(e) => setPreferences(prev => ({ ...prev, city: e.target.value }))}
-                                                placeholder="أدخل اسم المدينة بالإنجليزية"
-                                                className="text-left flex-1"
+                                                placeholder="أدخل اسم المدينة"
+                                                className="text-right flex-1"
                                             />
                                             <Button
                                                 variant="ghost"

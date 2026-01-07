@@ -31,29 +31,316 @@ export interface AladhanResponse {
 }
 
 export const ARAB_LOCATIONS = [
-    { country: "Iraq", name: "العراق", defaultMethod: 3, cities: ["Baghdad", "Basra", "Mosul", "Erbil", "Najaf", "Karbala", "Kirkuk", "Sulaymaniyah", "Hillah", "Nasiriyah", "Amarah", "Kut", "Ramadi", "Baqubah", "Dohuk", "Samawah"] },
-    { country: "Saudi Arabia", name: "السعودية", defaultMethod: 7, cities: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam", "Taif", "Tabuk", "Buraidah", "Khamis Mushait", "Abha", "Al-Khobar", "Jizan", "Hail", "Jubail", "Najran"] },
-    { country: "Egypt", name: "مصر", defaultMethod: 5, cities: ["Cairo", "Alexandria", "Giza", "Port Said", "Suez", "Mansoura", "Tanta", "Asyut", "Fayyum", "Zagazig", "Ismailia", "Aswan", "Luxor", "Hurghada"] },
-    { country: "United Arab Emirates", name: "الإمارات", defaultMethod: 8, cities: ["Abu Dhabi", "Dubai", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah", "Al Ain"] },
-    { country: "Kuwait", name: "الكويت", defaultMethod: 11, cities: ["Kuwait City", "Al Jahra", "Hawalli", "Ahmadi", "Farwaniya", "Mubarak Al-Kabeer"] },
-    { country: "Qatar", name: "قطر", defaultMethod: 10, cities: ["Doha", "Al Rayyan", "Al Wakrah", "Al Khor", "Madinat ash Shamal"] },
-    { country: "Bahrain", name: "البحرين", defaultMethod: 8, cities: ["Manama", "Riffa", "Muharraq", "Hamad Town", "Isa Town"] },
-    { country: "Oman", name: "عمان", defaultMethod: 8, cities: ["Muscat", "Salalah", "Sohar", "Sur", "Nizwa", "Ibri", "Khasab"] },
-    { country: "Jordan", name: "الأردن", defaultMethod: 3, cities: ["Amman", "Zarqa", "Irbid", "Aqaba", "Madaba", "Salt", "Mafraq"] },
-    { country: "Lebanon", name: "لبنان", defaultMethod: 3, cities: ["Beirut", "Tripoli", "Sidon", "Tyre", "Baalbek", "Byblos", "Jounieh"] },
-    { country: "Palestine", name: "فلسطين", defaultMethod: 3, cities: ["Jerusalem", "Gaza", "Ramallah", "Nablus", "Hebron", "Jenin", "Bethlehem", "Tulkarm"] },
-    { country: "Syria", name: "سوريا", defaultMethod: 3, cities: ["Damascus", "Aleppo", "Homs", "Latakia", "Hama", "Deir ez-Zor", "Tartus", "Daraa"] },
-    { country: "Morocco", name: "المغرب", defaultMethod: 3, cities: ["Rabat", "Casablanca", "Marrakech", "Fes", "Tangier", "Agadir", "Meknes", "Oujda"] },
-    { country: "Algeria", name: "الجزائر", defaultMethod: 3, cities: ["Algiers", "Oran", "Constantine", "Annaba", "Blida", "Batna", "Setif"] },
-    { country: "Tunisia", name: "تونس", defaultMethod: 3, cities: ["Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte", "Gabes"] },
-    { country: "Libya", name: "ليبيا", defaultMethod: 3, cities: ["Tripoli", "Benghazi", "Misrata", "Bayda", "Zawiya", "Tobruk"] },
-    { country: "Yemen", name: "اليمن", defaultMethod: 3, cities: ["Sanaa", "Aden", "Taiz", "Hodeidah", "Mukalla", "Ibb"] },
-    { country: "Sudan", name: "السودان", defaultMethod: 3, cities: ["Khartoum", "Omdurman", "Port Sudan", "Kassala", "El Obeid"] },
-    { country: "Mauritania", name: "موريتانيا", defaultMethod: 3, cities: ["Nouakchott", "Nouadhibou", "Kiffa"] },
-    { country: "Somalia", name: "الصومال", defaultMethod: 3, cities: ["Mogadishu", "Hargeisa", "Berbera"] },
-    { country: "Djibouti", name: "جيبوتي", defaultMethod: 3, cities: ["Djibouti City", "Ali Sabieh"] },
-    { country: "Comoros", name: "جزر القمر", defaultMethod: 3, cities: ["Moroni", "Mutsamudu"] },
+    {
+        country: "Iraq",
+        name: "العراق",
+        defaultMethod: 3,
+        cities: [
+            { en: "Baghdad", ar: "بغداد" },
+            { en: "Basra", ar: "البصرة" },
+            { en: "Mosul", ar: "الموصل" },
+            { en: "Erbil", ar: "أربيل" },
+            { en: "Najaf", ar: "النجف" },
+            { en: "Karbala", ar: "كربلاء" },
+            { en: "Kirkuk", ar: "كركوك" },
+            { en: "Sulaymaniyah", ar: "السليمانية" },
+            { en: "Hillah", ar: "الحلة" },
+            { en: "Nasiriyah", ar: "الناصرية" },
+            { en: "Amarah", ar: "العمارة" },
+            { en: "Kut", ar: "الكوت" },
+            { en: "Ramadi", ar: "الرمادي" },
+            { en: "Baqubah", ar: "بعقوبة" },
+            { en: "Dohuk", ar: "دهوك" },
+            { en: "Samawah", ar: "السماوة" }
+        ]
+    },
+    {
+        country: "Saudi Arabia",
+        name: "السعودية",
+        defaultMethod: 7,
+        cities: [
+            { en: "Riyadh", ar: "الرياض" },
+            { en: "Jeddah", ar: "جدة" },
+            { en: "Mecca", ar: "مكة المكرمة" },
+            { en: "Medina", ar: "المدينة المنورة" },
+            { en: "Dammam", ar: "الدمام" },
+            { en: "Taif", ar: "الطائف" },
+            { en: "Tabuk", ar: "تبوك" },
+            { en: "Buraidah", ar: "بريدة" },
+            { en: "Khamis Mushait", ar: "خميس مشيط" },
+            { en: "Abha", ar: "أبها" },
+            { en: "Al-Khobar", ar: "الخبر" },
+            { en: "Jizan", ar: "جيزان" },
+            { en: "Hail", ar: "حائل" },
+            { en: "Jubail", ar: "الجبيل" },
+            { en: "Najran", ar: "نجران" }
+        ]
+    },
+    {
+        country: "Egypt",
+        name: "مصر",
+        defaultMethod: 5,
+        cities: [
+            { en: "Cairo", ar: "القاهرة" },
+            { en: "Alexandria", ar: "الإسكندرية" },
+            { en: "Giza", ar: "الجيزة" },
+            { en: "Port Said", ar: "بورسعيد" },
+            { en: "Suez", ar: "السويس" },
+            { en: "Mansoura", ar: "المنصورة" },
+            { en: "Tanta", ar: "طنطا" },
+            { en: "Asyut", ar: "أسيوط" },
+            { en: "Fayyum", ar: "الفيوم" },
+            { en: "Zagazig", ar: "الزقازيق" },
+            { en: "Ismailia", ar: "الإسماعيلية" },
+            { en: "Aswan", ar: "أسوان" },
+            { en: "Luxor", ar: "الأقصر" },
+            { en: "Hurghada", ar: "الغردقة" }
+        ]
+    },
+    {
+        country: "United Arab Emirates",
+        name: "الإمارات",
+        defaultMethod: 8,
+        cities: [
+            { en: "Abu Dhabi", ar: "أبو ظبي" },
+            { en: "Dubai", ar: "دبي" },
+            { en: "Sharjah", ar: "الشارقة" },
+            { en: "Ajman", ar: "عجمان" },
+            { en: "Umm Al Quwain", ar: "أم القيوين" },
+            { en: "Ras Al Khaimah", ar: "رأس الخيمة" },
+            { en: "Fujairah", ar: "الفجيرة" },
+            { en: "Al Ain", ar: "العين" }
+        ]
+    },
+    {
+        country: "Kuwait",
+        name: "الكويت",
+        defaultMethod: 11,
+        cities: [
+            { en: "Kuwait City", ar: "مدينة الكويت" },
+            { en: "Al Jahra", ar: "الجهراء" },
+            { en: "Hawalli", ar: "حولي" },
+            { en: "Ahmadi", ar: "الأحمدي" },
+            { en: "Farwaniya", ar: "الفروانية" },
+            { en: "Mubarak Al-Kabeer", ar: "مبارك الكبير" }
+        ]
+    },
+    {
+        country: "Qatar",
+        name: "قطر",
+        defaultMethod: 10,
+        cities: [
+            { en: "Doha", ar: "الدوحة" },
+            { en: "Al Rayyan", ar: "الريان" },
+            { en: "Al Wakrah", ar: "الوكرة" },
+            { en: "Al Khor", ar: "الخور" },
+            { en: "Madinat ash Shamal", ar: "مدينة الشمال" }
+        ]
+    },
+    {
+        country: "Bahrain",
+        name: "البحرين",
+        defaultMethod: 8,
+        cities: [
+            { en: "Manama", ar: "المنامة" },
+            { en: "Riffa", ar: "الرفاع" },
+            { en: "Muharraq", ar: "المحرق" },
+            { en: "Hamad Town", ar: "مدينة حمد" },
+            { en: "Isa Town", ar: "مدينة عيسى" }
+        ]
+    },
+    {
+        country: "Oman",
+        name: "عمان",
+        defaultMethod: 8,
+        cities: [
+            { en: "Muscat", ar: "مسقط" },
+            { en: "Salalah", ar: "صلالة" },
+            { en: "Sohar", ar: "صحار" },
+            { en: "Sur", ar: "صور" },
+            { en: "Nizwa", ar: "نزوى" },
+            { en: "Ibri", ar: "عبري" },
+            { en: "Khasab", ar: "خصب" }
+        ]
+    },
+    {
+        country: "Jordan",
+        name: "الأردن",
+        defaultMethod: 3,
+        cities: [
+            { en: "Amman", ar: "عمان" },
+            { en: "Zarqa", ar: "الزرقاء" },
+            { en: "Irbid", ar: "إربد" },
+            { en: "Aqaba", ar: "العقبة" },
+            { en: "Madaba", ar: "مأدبا" },
+            { en: "Salt", ar: "السلط" },
+            { en: "Mafraq", ar: "المفرق" }
+        ]
+    },
+    {
+        country: "Lebanon",
+        name: "لبنان",
+        defaultMethod: 3,
+        cities: [
+            { en: "Beirut", ar: "بيروت" },
+            { en: "Tripoli", ar: "طرابلس" },
+            { en: "Sidon", ar: "صيدا" },
+            { en: "Tyre", ar: "صور" },
+            { en: "Baalbek", ar: "بعلبك" },
+            { en: "Byblos", ar: "جبيل" },
+            { en: "Jounieh", ar: "جونية" }
+        ]
+    },
+    {
+        country: "Palestine",
+        name: "فلسطين",
+        defaultMethod: 3,
+        cities: [
+            { en: "Jerusalem", ar: "القدس" },
+            { en: "Gaza", ar: "غزة" },
+            { en: "Ramallah", ar: "رام الله" },
+            { en: "Nablus", ar: "نابلس" },
+            { en: "Hebron", ar: "الخليل" },
+            { en: "Jenin", ar: "جنين" },
+            { en: "Bethlehem", ar: "بيت لحم" },
+            { en: "Tulkarm", ar: "طولكرم" }
+        ]
+    },
+    {
+        country: "Syria",
+        name: "سوريا",
+        defaultMethod: 3,
+        cities: [
+            { en: "Damascus", ar: "دمشق" },
+            { en: "Aleppo", ar: "حلب" },
+            { en: "Homs", ar: "حمص" },
+            { en: "Latakia", ar: "اللاذقية" },
+            { en: "Hama", ar: "حماة" },
+            { en: "Deir ez-Zor", ar: "دير الزور" },
+            { en: "Tartus", ar: "طرطوس" },
+            { en: "Daraa", ar: "درعا" }
+        ]
+    },
+    {
+        country: "Morocco",
+        name: "المغرب",
+        defaultMethod: 3,
+        cities: [
+            { en: "Rabat", ar: "الرباط" },
+            { en: "Casablanca", ar: "الدار البيضاء" },
+            { en: "Marrakech", ar: "مراكش" },
+            { en: "Fes", ar: "فاس" },
+            { en: "Tangier", ar: "طنجة" },
+            { en: "Agadir", ar: "أكادير" },
+            { en: "Meknes", ar: "مكناس" },
+            { en: "Oujda", ar: "وجدة" }
+        ]
+    },
+    {
+        country: "Algeria",
+        name: "الجزائر",
+        defaultMethod: 3,
+        cities: [
+            { en: "Algiers", ar: "الجزائر العاصمة" },
+            { en: "Oran", ar: "وهران" },
+            { en: "Constantine", ar: "قسنطينة" },
+            { en: "Annaba", ar: "عنابة" },
+            { en: "Blida", ar: "البليدة" },
+            { en: "Batna", ar: "باتنة" },
+            { en: "Setif", ar: "سطيف" }
+        ]
+    },
+    {
+        country: "Tunisia",
+        name: "تونس",
+        defaultMethod: 3,
+        cities: [
+            { en: "Tunis", ar: "تونس العاصمة" },
+            { en: "Sfax", ar: "صفاقس" },
+            { en: "Sousse", ar: "سوسة" },
+            { en: "Kairouan", ar: "القيروان" },
+            { en: "Bizerte", ar: "بنزرت" },
+            { en: "Gabes", ar: "قابس" }
+        ]
+    },
+    {
+        country: "Libya",
+        name: "ليبيا",
+        defaultMethod: 3,
+        cities: [
+            { en: "Tripoli", ar: "طرابلس" },
+            { en: "Benghazi", ar: "بنغازي" },
+            { en: "Misrata", ar: "مصراتة" },
+            { en: "Bayda", ar: "البيضاء" },
+            { en: "Zawiya", ar: "الزاوية" },
+            { en: "Tobruk", ar: "طبرق" }
+        ]
+    },
+    {
+        country: "Yemen",
+        name: "اليمن",
+        defaultMethod: 3,
+        cities: [
+            { en: "Sanaa", ar: "صنعاء" },
+            { en: "Aden", ar: "عدن" },
+            { en: "Taiz", ar: "تعز" },
+            { en: "Hodeidah", ar: "الحديدة" },
+            { en: "Mukalla", ar: "المكلا" },
+            { en: "Ibb", ar: "إب" }
+        ]
+    },
+    {
+        country: "Sudan",
+        name: "السودان",
+        defaultMethod: 3,
+        cities: [
+            { en: "Khartoum", ar: "الخرطوم" },
+            { en: "Omdurman", ar: "أم درمان" },
+            { en: "Port Sudan", ar: "بورتسودان" },
+            { en: "Kassala", ar: "كسلا" },
+            { en: "El Obeid", ar: "الأبيض" }
+        ]
+    },
+    {
+        country: "Mauritania",
+        name: "موريتانيا",
+        defaultMethod: 3,
+        cities: [
+            { en: "Nouakchott", ar: "نواكشوط" },
+            { en: "Nouadhibou", ar: "نواذيبو" },
+            { en: "Kiffa", ar: "كيفه" }
+        ]
+    },
+    {
+        country: "Somalia",
+        name: "الصومال",
+        defaultMethod: 3,
+        cities: [
+            { en: "Mogadishu", ar: "مقديشو" },
+            { en: "Hargeisa", ar: "هرجيسا" },
+            { en: "Berbera", ar: "بربرة" }
+        ]
+    },
+    {
+        country: "Djibouti",
+        name: "جيبوتي",
+        defaultMethod: 3,
+        cities: [
+            { en: "Djibouti City", ar: "مدينة جيبوتي" },
+            { en: "Ali Sabieh", ar: "علي صبيح" }
+        ]
+    },
+    {
+        country: "Comoros",
+        name: "جزر القمر",
+        defaultMethod: 3,
+        cities: [
+            { en: "Moroni", ar: "موروني" },
+            { en: "Mutsamudu", ar: "موتسامودو" }
+        ]
+    },
 ];
+
 
 export const CALCULATION_METHODS = [
     { id: 4, name: "مجلس الشؤون الإسلامية (كندا/أمريكا)" },
