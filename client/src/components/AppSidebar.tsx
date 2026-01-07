@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function AppSidebar() {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, signInWithGoogle } = useAuth();
   const [location, setLocation] = useLocation();
   const { setOpenMobile } = useSidebar();
 
@@ -218,7 +218,7 @@ export function AppSidebar() {
           <Button 
             variant="default" 
             className="w-full group-data-[collapsible=icon]:p-0"
-            onClick={() => setLocation("/")}
+            onClick={() => signInWithGoogle()}
           >
             <User className="h-4 w-4 md:ml-2" />
             <span className="group-data-[collapsible=icon]:hidden">تسجيل الدخول</span>
