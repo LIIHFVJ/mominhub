@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://noor-al-momin.com/sitemap.xml

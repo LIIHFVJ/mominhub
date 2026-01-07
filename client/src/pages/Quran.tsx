@@ -407,11 +407,10 @@ export default function Quran() {
                 </div>
             </Card>
 
-            {/* Reciter Selection - Improved Grid */}
+            {/* Reciter Selection - Improved List */}
             <Card className="rounded-3xl border-border/40 shadow-sm p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="font-bold flex items-center gap-2">
-                        <Headset className="w-4 h-4 text-primary" />
+                    <h3 className="font-bold">
                         اختر القارئ
                     </h3>
                     <div className="relative w-32">
@@ -425,18 +424,21 @@ export default function Quran() {
                         />
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
+                <div className="flex flex-col gap-1.5 max-h-[400px] overflow-y-auto p-1 custom-scrollbar">
                     {filteredReciters.map(reciter => (
                         <button
                             key={reciter.id}
                             onClick={() => setSelectedReciter(reciter.id)}
-                            className={`p-2 rounded-xl border transition-all text-center font-bold text-xs ${
+                            className={`p-3 rounded-xl border transition-all text-right font-bold text-sm flex items-center justify-between group ${
                                 selectedReciter === reciter.id
-                                ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                                : "border-border/40 bg-muted/30 hover:bg-muted/50"
+                                ? "border-primary bg-primary text-primary-foreground shadow-md"
+                                : "border-border/40 bg-muted/30 hover:bg-muted/50 hover:border-primary/30"
                             }`}
                         >
-                            {reciter.name}
+                            <span>{reciter.name}</span>
+                            {selectedReciter === reciter.id && (
+                                <div className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse" />
+                            )}
                         </button>
                     ))}
                 </div>

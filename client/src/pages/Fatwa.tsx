@@ -7,7 +7,7 @@ import { Info } from "lucide-react";
 export default function Fatwa() {
     const [messages, setMessages] = useState<Message[]>([
         { role: "system", content: "أنت مساعد فقهي ذكي." },
-        { role: "assistant", content: "مرحباً بك في رفيق المؤمن. أنا مساعدك الذكي للإجابة على الأسئلة الفقهية. يمكنك اختيار المذهب (سني/شيعي) للحصول على إجابة أكثر دقة." }
+        { role: "assistant", content: "مرحباً بك في نور المؤمن. أنا مساعدك الذكي للإجابة على الأسئلة الفقهية. يمكنك اختيار المذهب (سني/شيعي) للحصول على إجابة أكثر دقة." }
     ]);
     const [context, setContext] = useState<'sunni' | 'shia'>('sunni');
 

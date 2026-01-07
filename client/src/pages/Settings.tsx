@@ -212,7 +212,7 @@ export default function Settings() {
                         <Sparkles className="w-8 h-8" />
                         الإعدادات المتقدمة
                     </h1>
-                    <p className="text-muted-foreground italic">خصص تجربتك الروحية مع رفيق المؤمن</p>
+                    <p className="text-muted-foreground italic">خصص تجربتك الروحية مع نور المؤمن</p>
                 </div>
 
                 <div className="space-y-6">
