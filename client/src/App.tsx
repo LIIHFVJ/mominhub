@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 function MobileNav() {
+  const { user, signInWithGoogle } = useAuth();
   const [location, setLocation] = useLocation();
   const isActive = (href: string) => location === href;
 
@@ -51,13 +52,22 @@ function MobileNav() {
             <span className="text-[10px]">{item.label}</span>
           </button>
         ))}
+        {!user && (
+          <button
+            onClick={() => signInWithGoogle()}
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <User className="h-5 w-5" />
+            <span className="text-[10px]">دخول</span>
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 function TopHeader() {
-  const { user } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const [location] = useLocation();
   
   const getPageTitle = () => {
@@ -104,7 +114,7 @@ function TopHeader() {
           </Button>
           
           {!user && (
-            <Button variant="default" size="sm" className="hidden sm:flex">
+            <Button variant="default" size="sm" className="hidden sm:flex" onClick={() => signInWithGoogle()}>
               تسجيل الدخول
             </Button>
           )}
