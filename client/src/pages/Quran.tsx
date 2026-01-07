@@ -30,77 +30,77 @@ const RECITERS: Reciter[] = [
   {
     id: "ar.alafasy",
     name: "مشاري العفاسي",
-    image: "https://static.quran.com/images/reciters/1/mishari-rashid-alafasy.png",
+    image: "https://www.mp3quran.net/images/reicters/1.jpg",
     bio: "مشاري بن راشد العفاسي، إمام وخطيب وقارئ كويتي، صاحب صوت ندي وأداء مميز.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.shaatree",
     name: "أبو بكر الشاطري",
-    image: "https://static.quran.com/images/reciters/1/abu-bakr-al-shatri.png",
+    image: "https://www.mp3quran.net/images/reicters/5.jpg",
     bio: "أبو بكر بن محمد الشاطري، قارئ سعودي، ولد في جدة عام 1970م.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.ahmedajamy",
     name: "أحمد العجمي",
-    image: "https://static.quran.com/images/reciters/1/ahmed-al-ajmi.png",
+    image: "https://www.mp3quran.net/images/reicters/13.jpg",
     bio: "أحمد بن علي العجمي، قارئ للقرآن الكريم من مدينة الخبر بالسعودية.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.mahermuaiqly",
     name: "ماهر المعيقلي",
-    image: "https://static.quran.com/images/reciters/1/maher-al-muaiqly.png",
+    image: "https://www.mp3quran.net/images/reicters/25.jpg",
     bio: "ماهر بن حمد المعيقلي، إمام وخطيب المسجد الحرام بمكة المكرمة.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.husary",
     name: "محمود خليل الحصري",
-    image: "https://static.quran.com/images/reciters/1/mahmoud-khalil-al-husary.png",
+    image: "https://www.mp3quran.net/images/reicters/31.jpg",
     bio: "أحد أشهر قراء القرآن الكريم في العالم الإسلامي، تميز بجودة القراءة وإتقان الأحكام.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.saoodshuraym",
     name: "سعود الشريم",
-    image: "https://static.quran.com/images/reciters/1/saud-al-shuraym.png",
+    image: "https://www.mp3quran.net/images/reicters/23.jpg",
     bio: "سعود بن إبراهيم الشريم، إمام وخطيب المسجد الحرام بمكة المكرمة سابقاً.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.abdurrahmansudais",
     name: "عبد الرحمن السديس",
-    image: "https://static.quran.com/images/reciters/1/abdul-rahman-al-sudais.png",
+    image: "https://www.mp3quran.net/images/reicters/22.jpg",
     bio: "الرئيس العام لشؤون المسجد الحرام والمسجد النبوي، وإمام الحرم المكي الشريف.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.minshawi",
     name: "محمد صديق المنشاوي",
-    image: "https://static.quran.com/images/reciters/1/mohammad-siddiq-al-minshawi.png",
+    image: "https://www.mp3quran.net/images/reicters/33.jpg",
     bio: "أحد أعلام القراء في مصر والعالم الإسلامي، لُقب بصاحب الصوت الباكي.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.abdulsamad",
     name: "عبد الباسط عبد الصمد",
-    image: "https://static.quran.com/images/reciters/1/abdul-basit-abd-us-samad.png",
+    image: "https://www.mp3quran.net/images/reicters/29.jpg",
     bio: "صاحب الحنجرة الذهبية، أحد أشهر القراء في تاريخ العالم الإسلامي.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.yasseradrussary",
     name: "ياسر الدوسري",
-    image: "https://static.quran.com/images/reciters/1/yasser-al-dosari.png",
+    image: "https://www.mp3quran.net/images/reicters/24.jpg",
     bio: "ياسر بن راشد الدوسري، إمام وخطيب المسجد الحرام بمكة المكرمة.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.faresabbad",
     name: "فارس عباد",
-    image: "https://static.quran.com/images/reciters/1/fares-abbad.png",
+    image: "https://www.mp3quran.net/images/reicters/16.jpg",
     bio: "فارس عبد ربه محمد عباد، قارئ يمني، يتميز بصوت شجي وأداء هادئ.",
     quality: "128kbps MP3"
   }
