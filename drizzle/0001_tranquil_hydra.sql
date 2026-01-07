@@ -1,0 +1,21 @@
+ALTER TABLE "user_preferences" ADD COLUMN "reciter_id" varchar(100) DEFAULT 'ar.alafasy';--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "language" varchar(10) DEFAULT 'ar';--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "country" varchar(100) DEFAULT 'Iraq';--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "city" varchar(100) DEFAULT 'Baghdad';--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "notifications_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "athan_enabled" boolean DEFAULT false;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "pre_notification_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "calculation_method" integer DEFAULT 4;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "pre_notification_time" integer DEFAULT 5;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "athan_voice" text DEFAULT 'makkah';--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "fajr_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "dhuhr_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "asr_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "maghrib_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "isha_enabled" boolean DEFAULT true;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "sunnah_tahajjud" boolean DEFAULT false;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "sunnah_duha" boolean DEFAULT false;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "sunnah_witr" boolean DEFAULT false;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "dnd_mode_enabled" boolean DEFAULT false;--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "dnd_start" varchar(10) DEFAULT '22:00';--> statement-breakpoint
+ALTER TABLE "user_preferences" ADD COLUMN "dnd_end" varchar(10) DEFAULT '04:00';
