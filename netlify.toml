@@ -13,4 +13,4 @@
   status = 200
 
 [functions]
-  directory = "server/functions"
+  directory = "dist/functions"
