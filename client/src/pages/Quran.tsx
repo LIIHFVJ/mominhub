@@ -21,7 +21,6 @@ import {
 interface Reciter {
   id: string;
   name: string;
-  image: string;
   bio: string;
   quality: string;
 }
@@ -30,77 +29,66 @@ const RECITERS: Reciter[] = [
   {
     id: "ar.alafasy",
     name: "مشاري العفاسي",
-    image: "https://www.mp3quran.net/images/reciters/1.jpg",
     bio: "مشاري بن راشد العفاسي، إمام وخطيب وقارئ كويتي، صاحب صوت ندي وأداء مميز.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.shaatree",
     name: "أبو بكر الشاطري",
-    image: "https://www.mp3quran.net/images/reciters/5.jpg",
     bio: "أبو بكر بن محمد الشاطري، قارئ سعودي، ولد في جدة عام 1970م.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.ahmedajamy",
     name: "أحمد العجمي",
-    image: "https://www.mp3quran.net/images/reciters/13.jpg",
     bio: "أحمد بن علي العجمي، قارئ للقرآن الكريم من مدينة الخبر بالسعودية.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.mahermuaiqly",
     name: "ماهر المعيقلي",
-    image: "https://www.mp3quran.net/images/reciters/25.jpg",
     bio: "ماهر بن حمد المعيقلي، إمام وخطيب المسجد الحرام بمكة المكرمة.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.husary",
     name: "محمود خليل الحصري",
-    image: "https://www.mp3quran.net/images/reciters/31.jpg",
     bio: "أحد أشهر قراء القرآن الكريم في العالم الإسلامي، تميز بجودة القراءة وإتقان الأحكام.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.saoodshuraym",
     name: "سعود الشريم",
-    image: "https://www.mp3quran.net/images/reciters/23.jpg",
     bio: "سعود بن إبراهيم الشريم، إمام وخطيب المسجد الحرام بمكة المكرمة سابقاً.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.abdurrahmansudais",
     name: "عبد الرحمن السديس",
-    image: "https://www.mp3quran.net/images/reciters/22.jpg",
     bio: "الرئيس العام لشؤون المسجد الحرام والمسجد النبوي، وإمام الحرم المكي الشريف.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.minshawi",
     name: "محمد صديق المنشاوي",
-    image: "https://www.mp3quran.net/images/reciters/33.jpg",
     bio: "أحد أعلام القراء في مصر والعالم الإسلامي، لُقب بصاحب الصوت الباكي.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.abdulsamad",
     name: "عبد الباسط عبد الصمد",
-    image: "https://www.mp3quran.net/images/reciters/29.jpg",
     bio: "صاحب الحنجرة الذهبية، أحد أشهر القراء في تاريخ العالم الإسلامي.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.yasseradrussary",
     name: "ياسر الدوسري",
-    image: "https://www.mp3quran.net/images/reciters/24.jpg",
     bio: "ياسر بن راشد الدوسري، إمام وخطيب المسجد الحرام بمكة المكرمة.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.faresabbad",
     name: "فارس عباد",
-    image: "https://www.mp3quran.net/images/reciters/16.jpg",
     bio: "فارس عبد ربه محمد عباد، قارئ يمني، يتميز بصوت شجي وأداء هادئ.",
     quality: "128kbps MP3"
   }
@@ -449,14 +437,9 @@ export default function Quran() {
                             }`}
                         >
                             <div className="relative">
-                                <img 
-                                    src={reciter.image} 
-                                    alt={reciter.name} 
-                                    className="w-12 h-12 rounded-full object-cover"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reciter.name)}&background=6366f1&color=fff&bold=true`;
-                                    }}
-                                />
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
+                                    <Headset className="w-6 h-6" />
+                                </div>
                                 {selectedReciter === reciter.id && (
                                     <div className="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-0.5">
                                         <Music className="w-2.5 h-2.5" />
@@ -483,17 +466,8 @@ export default function Quran() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <button className="relative group">
-                                        <img 
-                                            src={RECITERS.find(r => r.id === selectedReciter)?.image} 
-                                            className="w-16 h-16 rounded-2xl object-cover shadow-lg border-2 border-primary/10 group-hover:border-primary/40 transition-all" 
-                                            alt="Reciter"
-                                            onError={(e) => {
-                                                const reciterName = RECITERS.find(r => r.id === selectedReciter)?.name || "Reciter";
-                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reciterName)}&background=6366f1&color=fff&bold=true`;
-                                            }}
-                                        />
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Headset className="w-6 h-6 text-white" />
+                                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg border-2 border-primary/10 group-hover:border-primary/40 transition-all">
+                                            <Headset className="w-8 h-8 text-primary" />
                                         </div>
                                     </button>
                                 </DialogTrigger>
@@ -515,14 +489,9 @@ export default function Quran() {
                                                     : "border-transparent bg-muted/50 hover:bg-muted"
                                                 }`}
                                             >
-                                                <img 
-                                                    src={reciter.image} 
-                                                    alt={reciter.name} 
-                                                    className="w-12 h-12 rounded-full object-cover" 
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reciter.name)}&background=6366f1&color=fff&bold=true`;
-                                                    }}
-                                                />
+                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
+                                                    <Headset className="w-6 h-6" />
+                                                </div>
                                                 <span className="text-[10px] font-bold text-center">{reciter.name}</span>
                                             </button>
                                         ))}
