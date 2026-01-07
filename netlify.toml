@@ -14,4 +14,3 @@
 
 [functions]
   directory = "server/functions"
-  node_version = "20"
