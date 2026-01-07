@@ -78,7 +78,7 @@ export function AppSidebar() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-            <span className="font-bold text-lg text-primary">نور المؤمن</span>
+            <span className="font-bold text-lg text-primary">رفيق المؤمن</span>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">المنصة الإسلامية الشاملة</span>
           </div>
         </div>

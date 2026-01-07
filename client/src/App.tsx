@@ -73,7 +73,7 @@ function TopHeader() {
       case "/favorites": return "المفضلة";
       case "/settings": return "الإعدادات";
       case "/admin": return "لوحة التحكم";
-      default: return "نور المؤمن";
+      default: return "رفيق المؤمن";
     }
   };
 

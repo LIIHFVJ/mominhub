@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://noor-al-momin.com/sitemap.xml
+Sitemap: https://rafiq-al-momin.com/sitemap.xml

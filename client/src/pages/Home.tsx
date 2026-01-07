@@ -172,7 +172,7 @@ export default function Home() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent leading-tight">
-            نور المؤمن
+            رفيق المؤمن
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 font-light leading-relaxed max-w-3xl mx-auto">
             منصة إسلامية شاملة تجمع القرآن الكريم والأذكار والأدعية والمكتبة
@@ -455,7 +455,7 @@ export default function Home() {
             ابدأ رحلتك الروحية اليوم
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            انضم إلى آلاف المستخدمين الذين يستخدمون نور المؤمن لتحسين عبادتهم
+            انضم إلى آلاف المستخدمين الذين يستخدمون رفيق المؤمن لتحسين عبادتهم
             وتقويتهم الروحية
           </p>
           {!user && (
@@ -468,7 +468,7 @@ export default function Home() {
       <footer className="border-t border-border py-8 px-4">
         <div className="max-w-6xl mx-auto text-center text-muted-foreground">
           <p>
-            نور المؤمن - منصة إسلامية موثوقة تعتمد على مصادر إسلامية أصيلة
+            رفيق المؤمن - منصة إسلامية موثوقة تعتمد على مصادر إسلامية أصيلة
           </p>
           <p className="mt-2 text-sm">
             جميع المحتوى الإسلامي مستمد من مصادر موثوقة وموثقة
