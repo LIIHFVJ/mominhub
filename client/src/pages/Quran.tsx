@@ -21,6 +21,7 @@ import {
 interface Reciter {
   id: string;
   name: string;
+  image: string;
   bio: string;
   quality: string;
 }
@@ -29,25 +30,28 @@ const RECITERS: Reciter[] = [
   {
     id: "ar.alafasy",
     name: "مشاري العفاسي",
+    image: "https://i.ibb.co/hR8z8jY/alafasy.jpg",
     bio: "مشاري بن راشد العفاسي، إمام وخطيب وقارئ كويتي، صاحب صوت ندي وأداء مميز.",
-    quality: "128kbps MP3"
-  },
-  {
-    id: "ar.shaatree",
-    name: "أبو بكر الشاطري",
-    bio: "أبو بكر بن محمد الشاطري، قارئ سعودي، ولد في جدة عام 1970م.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.ahmedajamy",
     name: "أحمد العجمي",
+    image: "https://i.ibb.co/L5fX0y0/ajamy.jpg",
     bio: "أحمد بن علي العجمي، قارئ للقرآن الكريم من مدينة الخبر بالسعودية.",
     quality: "128kbps MP3"
   },
   {
     id: "ar.mahermuaiqly",
     name: "ماهر المعيقلي",
+    image: "https://i.ibb.co/vY8Pz0T/maher.jpg",
     bio: "ماهر بن حمد المعيقلي، إمام وخطيب المسجد الحرام بمكة المكرمة.",
+    quality: "128kbps MP3"
+  },
+  {
+    id: "ar.shaatree",
+    name: "أبو بكر الشاطري",
+    bio: "أبو بكر بن محمد الشاطري، قارئ سعودي، ولد في جدة عام 1970م.",
     quality: "128kbps MP3"
   },
   {
@@ -437,9 +441,25 @@ export default function Quran() {
                             }`}
                         >
                             <div className="relative">
-                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
-                                    <Headset className="w-6 h-6" />
-                                </div>
+                                {reciter.image ? (
+                                    <img 
+                                        src={reciter.image} 
+                                        alt={reciter.name} 
+                                        className="w-12 h-12 rounded-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                            (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                                                <div class="w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headset w-6 h-6"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a2 2 0 0 1-2 2h-5"></path></svg>
+                                                </div>
+                                            `;
+                                        }}
+                                    />
+                                ) : (
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
+                                        <Headset className="w-6 h-6" />
+                                    </div>
+                                )}
                                 {selectedReciter === reciter.id && (
                                     <div className="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-0.5">
                                         <Music className="w-2.5 h-2.5" />
@@ -466,9 +486,25 @@ export default function Quran() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <button className="relative group">
-                                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg border-2 border-primary/10 group-hover:border-primary/40 transition-all">
-                                            <Headset className="w-8 h-8 text-primary" />
-                                        </div>
+                                        {RECITERS.find(r => r.id === selectedReciter)?.image ? (
+                                            <img 
+                                                src={RECITERS.find(r => r.id === selectedReciter)?.image} 
+                                                className="w-16 h-16 rounded-2xl object-cover shadow-lg border-2 border-primary/10 group-hover:border-primary/40 transition-all" 
+                                                alt="Reciter"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                    (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                                                        <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg border-2 border-primary/10 group-hover:border-primary/40 transition-all">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headset text-primary"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a2 2 0 0 1-2 2h-5"></path></svg>
+                                                        </div>
+                                                    `;
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shadow-lg border-2 border-primary/10 group-hover:border-primary/40 transition-all">
+                                                <Headset className="w-8 h-8 text-primary" />
+                                            </div>
+                                        )}
                                     </button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[425px] font-arabic" dir="rtl">
@@ -489,9 +525,25 @@ export default function Quran() {
                                                     : "border-transparent bg-muted/50 hover:bg-muted"
                                                 }`}
                                             >
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
-                                                    <Headset className="w-6 h-6" />
-                                                </div>
+                                                {reciter.image ? (
+                                                    <img 
+                                                        src={reciter.image} 
+                                                        alt={reciter.name} 
+                                                        className="w-12 h-12 rounded-full object-cover"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                            (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                                                                <div class="w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headset w-6 h-6"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a2 2 0 0 1-2 2h-5"></path></svg>
+                                                                </div>
+                                                            `;
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedReciter === reciter.id ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
+                                                        <Headset className="w-6 h-6" />
+                                                    </div>
+                                                )}
                                                 <span className="text-[10px] font-bold text-center">{reciter.name}</span>
                                             </button>
                                         ))}
