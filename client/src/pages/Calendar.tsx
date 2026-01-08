@@ -54,12 +54,49 @@ const ISLAMIC_EVENTS: HijriEvent[] = [
     { month: 12, day: 18, title: "عيد الغدير الأغر", description: "تنصيب الإمام علي عليه السلام خليفة", type: 'holy' },
 ];
 
+/**
+ * Calendar Page Components & Logic
+ * --------------------------------
+ * This page provides a comprehensive Hijri calendar with:
+ * 1. Automatic data fetching from Aladhan API (with multiple failover mirrors).
+ * 2. Accurate Hijri-Gregorian conversion.
+ * 3. Islamic events tracking and upcoming reminders.
+ * 4. Prayer times for selected days.
+ * 
+ * API Endpoints used:
+ * - Primary: api.aladhan.com
+ * - Backup 1: islamic.network
+ * - Backup 2: alislam.ru
+ */
+
 // Aladhan API Endpoints
 const API_BASE_URL = "https://api.aladhan.com/v1";
 const API_BACKUP_URLS = [
     "https://alislam.api.islamic.network/v1",
     "https://aladhan.api.alislam.ru/v1"
 ];
+
+/**
+ * Helper to fetch data with automatic fallback to backup URLs
+ */
+async function fetchWithFallback(endpoint: string) {
+    const urls = [API_BASE_URL, ...API_BACKUP_URLS];
+    let lastError = null;
+
+    for (const baseUrl of urls) {
+        try {
+            const res = await fetch(`${baseUrl}${endpoint}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.code === 200) return data;
+            }
+        } catch (error) {
+            lastError = error;
+            console.warn(`Failed to fetch from ${baseUrl}:`, error);
+        }
+    }
+    throw lastError || new Error("Failed to fetch from all sources");
+}
 
 interface HijriDateInfo {
     day: string;
@@ -96,40 +133,34 @@ export default function Calendar() {
             const dateStr = format(date, "dd-MM-yyyy");
             
             // Get Hijri info for the requested date
-            const todayRes = await fetch(`${API_BASE_URL}/gToH/${dateStr}`);
-            const todayData = await todayRes.json();
+            const todayData = await fetchWithFallback(`/gToH/${dateStr}`);
             
-            if (todayData.code === 200) {
-                const currentHijri = todayData.data.hijri;
-                setHijriDate(currentHijri);
-                
-                const hMonth = currentHijri.month.number;
-                const hYear = currentHijri.year;
-                
-                // Use preferences or fallback to Makkah
-                const city = preferences?.city || "Makkah";
-                const country = preferences?.country || "Saudi Arabia";
-                const method = preferences?.calculation_method || 4;
+            const currentHijri = todayData.data.hijri;
+            setHijriDate(currentHijri);
+            
+            const hMonth = currentHijri.month.number;
+            const hYear = currentHijri.year;
+            
+            // Use preferences or fallback to Makkah
+            const city = preferences?.city || "Makkah";
+            const country = preferences?.country || "Saudi Arabia";
+            const method = preferences?.calculation_method || 4;
 
-                // Fetch the full Hijri month calendar
-                const calendarRes = await fetch(
-                    `${API_BASE_URL}/hijriCalendar/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
-                );
-                const calendarData = await calendarRes.json();
-                
-                if (calendarData.code === 200) {
-                    setMonthDays(calendarData.data);
-                    setMonthlyData(calendarData.data);
-                    
-                    const today = calendarData.data.find((d: any) => 
-                        parseInt(d.date.hijri.day) === parseInt(currentHijri.day)
-                    );
-                    if (today) setSelectedDay(today);
-                }
-            }
+            // Fetch the full Hijri month calendar
+            const calendarData = await fetchWithFallback(
+                `/hijriCalendar/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
+            );
+            
+            setMonthDays(calendarData.data);
+            setMonthlyData(calendarData.data);
+            
+            const today = calendarData.data.find((d: any) => 
+                parseInt(d.date.hijri.day) === parseInt(currentHijri.day)
+            );
+            if (today) setSelectedDay(today);
         } catch (error) {
             console.error("Fetch Error:", error);
-            toast.error("خطأ في تحميل البيانات");
+            toast.error("خطأ في تحميل البيانات. جاري محاولة استخدام الخوادم الاحتياطية...");
         } finally {
             setLoading(false);
         }
@@ -163,12 +194,11 @@ export default function Calendar() {
             const country = preferences?.country || "Saudi Arabia";
             const method = preferences?.calculation_method || 4;
 
-            const calendarRes = await fetch(
-                `${API_BASE_URL}/hijriCalendar/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
+            const calendarData = await fetchWithFallback(
+                `/hijriCalendar/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
             );
-            const calendarData = await calendarRes.json();
             
-            if (calendarData.code === 200 && calendarData.data.length > 0) {
+            if (calendarData.data.length > 0) {
                 setMonthDays(calendarData.data);
                 setMonthlyData(calendarData.data);
                 const firstDayOfNewMonth = calendarData.data[0];
@@ -197,11 +227,8 @@ export default function Calendar() {
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
             
-            const res = await fetch(`${API_BASE_URL}/gToH/${day}-${month}-${year}`);
-            const data = await res.json();
-            if (data.code === 200) {
-                setConvertedResult({ type: 'hijri', data: data.data.hijri });
-            }
+            const data = await fetchWithFallback(`/gToH/${day}-${month}-${year}`);
+            setConvertedResult({ type: 'hijri', data: data.data.hijri });
         } catch (error) {
             toast.error("تاريخ غير صالح");
         }
@@ -214,11 +241,8 @@ export default function Calendar() {
             return;
         }
         try {
-            const res = await fetch(`${API_BASE_URL}/hToG/${day}-${month}-${year}`);
-            const data = await res.json();
-            if (data.code === 200) {
-                setConvertedResult({ type: 'gregorian', data: data.data.gregorian });
-            }
+            const data = await fetchWithFallback(`/hToG/${day}-${month}-${year}`);
+            setConvertedResult({ type: 'gregorian', data: data.data.gregorian });
         } catch (error) {
             toast.error("تاريخ غير صالح");
         }
@@ -294,13 +318,13 @@ export default function Calendar() {
                             exit={{ opacity: 0, y: -10 }}
                             className="space-y-4"
                         >
-                            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight">
+                            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter">
                                 {hijriDate ? (
-                                    `${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year} هـ`
+                                    `${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year}`
                                 ) : "..."}
                             </h1>
-                            <p className="text-xl md:text-2xl text-white/60 font-medium">
-                                {format(currentDate, "EEEE d MMMM yyyy", { locale: ar })}
+                            <p className="text-2xl md:text-3xl text-white/40 font-bold">
+                                هجري
                             </p>
                         </motion.div>
                     </AnimatePresence>
@@ -460,79 +484,86 @@ export default function Calendar() {
                     )}
                 </AnimatePresence>
 
-                {/* Conversion Section - Clean Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Conversion Section - Clean & Unified */}
+                <div className="px-2">
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Card className="bg-[#111] border-none rounded-[2rem] hover:bg-[#1a1a1a] transition-all cursor-pointer group p-8">
+                            <Card className="bg-[#111] border border-white/5 rounded-[2.5rem] hover:bg-[#161616] transition-all cursor-pointer group p-10">
                                 <div className="flex items-center justify-between">
-                                    <div className="space-y-2">
-                                        <h4 className="text-2xl font-bold text-white">تحويل التاريخ الهجري</h4>
-                                        <p className="text-white/40">التاريخ الهجري إلى الميلادي</p>
+                                    <div className="space-y-3">
+                                        <h4 className="text-3xl font-bold text-white">تحويل التاريخ</h4>
+                                        <p className="text-xl text-white/40 font-medium">تحويل بين التاريخ الهجري والميلادي بدقة</p>
                                     </div>
-                                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-white/60 group-hover:bg-primary/20 group-hover:text-primary transition-all">
-                                        <CalendarIcon className="w-8 h-8" />
+                                    <div className="w-20 h-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-primary/20 group-hover:text-primary transition-all duration-500">
+                                        <RefreshCw className="w-10 h-10 group-hover:rotate-180 transition-transform duration-700" />
                                     </div>
                                 </div>
                             </Card>
                         </DialogTrigger>
-                        <DialogContent className="bg-[#111] border-white/10 text-white rounded-[2rem] font-arabic">
-                            <DialogHeader>
-                                <DialogTitle className="text-2xl font-bold text-center">تحويل التاريخ</DialogTitle>
+                        <DialogContent className="bg-[#0f0f0f] border-white/10 text-white sm:max-w-md rounded-[2.5rem] font-arabic p-8">
+                            <DialogHeader className="mb-8">
+                                <DialogTitle className="text-3xl font-bold text-center">أداة تحويل التاريخ</DialogTitle>
                             </DialogHeader>
-                            <div className="space-y-6 py-4">
-                                <div className="flex bg-white/5 p-1 rounded-2xl">
+                            <div className="space-y-8">
+                                <div className="flex bg-white/5 p-1.5 rounded-2xl">
                                      <button 
-                                         onClick={() => setConversionType('GtoH')} 
-                                         className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${conversionType === 'GtoH' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/60'}`}
+                                         onClick={() => { setConversionType('GtoH'); setConvertedResult(null); }} 
+                                         className={`flex-1 py-4 text-base font-bold rounded-xl transition-all ${conversionType === 'GtoH' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/60'}`}
                                      >
                                          ميلادي ← هجري
                                      </button>
                                      <button 
-                                         onClick={() => setConversionType('HtoG')} 
-                                         className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${conversionType === 'HtoG' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/60'}`}
+                                         onClick={() => { setConversionType('HtoG'); setConvertedResult(null); }} 
+                                         className={`flex-1 py-4 text-base font-bold rounded-xl transition-all ${conversionType === 'HtoG' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/60'}`}
                                      >
                                          هجري ← ميلادي
                                      </button>
                                  </div>
-                                {conversionType === 'GtoH' ? (
-                                    <div className="space-y-4">
-                                        <Input type="date" value={convertGtoH} onChange={(e) => setConvertGtoH(e.target.value)} className="bg-white/5 border-none h-14 rounded-2xl text-right text-lg text-white" />
-                                        <Button onClick={handleGtoHConvert} className="w-full h-14 rounded-2xl text-lg font-bold bg-primary hover:bg-primary/90">تحويل الآن</Button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <Input placeholder="اليوم" value={convertHtoG.day} onChange={e => setConvertHtoG(prev => ({ ...prev, day: e.target.value }))} className="bg-white/5 border-none h-14 rounded-2xl text-center text-lg text-white" />
-                                            <Input placeholder="الشهر" value={convertHtoG.month} onChange={e => setConvertHtoG(prev => ({ ...prev, month: e.target.value }))} className="bg-white/5 border-none h-14 rounded-2xl text-center text-lg text-white" />
-                                            <Input placeholder="السنة" value={convertHtoG.year} onChange={e => setConvertHtoG(prev => ({ ...prev, year: e.target.value }))} className="bg-white/5 border-none h-14 rounded-2xl text-center text-lg text-white" />
+
+                                <div className="space-y-6">
+                                    {conversionType === 'GtoH' ? (
+                                        <div className="space-y-4">
+                                            <label className="text-sm text-white/40 block mr-2">اختر التاريخ الميلادي</label>
+                                            <Input 
+                                                type="date" 
+                                                value={convertGtoH} 
+                                                onChange={(e) => setConvertGtoH(e.target.value)} 
+                                                className="bg-white/5 border-none h-16 rounded-2xl text-right text-xl text-white focus:ring-2 ring-primary/20" 
+                                            />
+                                            <Button onClick={handleGtoHConvert} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20">تحويل الآن</Button>
                                         </div>
-                                        <Button onClick={handleHtoGConvert} className="w-full h-14 rounded-2xl text-lg font-bold bg-primary hover:bg-primary/90">تحويل الآن</Button>
-                                    </div>
-                                )}
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <label className="text-sm text-white/40 block mr-2">أدخل التاريخ الهجري (يوم-شهر-سنة)</label>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <Input placeholder="يوم" value={convertHtoG.day} onChange={e => setConvertHtoG(prev => ({ ...prev, day: e.target.value }))} className="bg-white/5 border-none h-16 rounded-2xl text-center text-xl text-white focus:ring-2 ring-primary/20" />
+                                                <Input placeholder="شهر" value={convertHtoG.month} onChange={e => setConvertHtoG(prev => ({ ...prev, month: e.target.value }))} className="bg-white/5 border-none h-16 rounded-2xl text-center text-xl text-white focus:ring-2 ring-primary/20" />
+                                                <Input placeholder="سنة" value={convertHtoG.year} onChange={e => setConvertHtoG(prev => ({ ...prev, year: e.target.value }))} className="bg-white/5 border-none h-16 rounded-2xl text-center text-xl text-white focus:ring-2 ring-primary/20" />
+                                            </div>
+                                            <Button onClick={handleHtoGConvert} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20">تحويل الآن</Button>
+                                        </div>
+                                    )}
+                                </div>
+
                                 {convertedResult && (
-                                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
-                                        <p className="text-sm text-white/40 mb-1">التاريخ المحول</p>
-                                        <p className="text-2xl font-bold text-primary">
-                                            {convertedResult.type === 'hijri' ? `${convertedResult.data.day} ${convertedResult.data.month.ar} ${convertedResult.data.year} هـ` : `${convertedResult.data.day} ${convertedResult.data.month.en} ${convertedResult.data.year} م`}
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="p-8 rounded-3xl bg-primary/10 border border-primary/20 text-center space-y-2"
+                                    >
+                                        <p className="text-sm text-primary/60 font-medium">النتيجة</p>
+                                        <p className="text-3xl font-black text-white">
+                                            {convertedResult.type === 'hijri' ? (
+                                                `${convertedResult.data.day} ${convertedResult.data.month.ar} ${convertedResult.data.year} هـ`
+                                            ) : (
+                                                `${convertedResult.data.day} ${convertedResult.data.month.en} ${convertedResult.data.year} م`
+                                            )}
                                         </p>
-                                    </div>
+                                    </motion.div>
                                 )}
                             </div>
                         </DialogContent>
                     </Dialog>
-
-                    <Card className="bg-[#111] border-none rounded-[2rem] hover:bg-[#1a1a1a] transition-all cursor-pointer group p-8">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-2">
-                                <h4 className="text-2xl font-bold text-white">تحويل التاريخ الميلادي</h4>
-                                <p className="text-white/40">التاريخ الميلادي إلى الهجري</p>
-                            </div>
-                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-white/60 group-hover:bg-primary/20 group-hover:text-primary transition-all">
-                                <CalendarIcon className="w-8 h-8" />
-                            </div>
-                        </div>
-                    </Card>
                 </div>
 
                 {/* Upcoming Event - Exact Match to Image */}
