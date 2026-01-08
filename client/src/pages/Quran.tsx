@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
+import { AuthReminder } from "@/components/AuthReminder";
 import {
   Dialog,
   DialogContent,
@@ -347,6 +348,8 @@ export default function Quran() {
     <div className="min-h-screen bg-background p-4 font-arabic" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-8">
         
+        <AuthReminder className="mb-6" />
+
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-primary/5 p-8 rounded-3xl border border-primary/10">
           <div className="space-y-2">

@@ -216,12 +216,12 @@ export function AppSidebar() {
           </DropdownMenu>
         ) : (
           <Button 
-            variant="default" 
-            className="w-full group-data-[collapsible=icon]:p-0"
+            variant="outline" 
+            className="w-full group-data-[collapsible=icon]:p-0 border-primary/20 hover:bg-primary/5"
             onClick={() => signInWithGoogle()}
           >
             <User className="h-4 w-4 md:ml-2" />
-            <span className="group-data-[collapsible=icon]:hidden">تسجيل الدخول</span>
+            <span className="group-data-[collapsible=icon]:hidden">تسجيل الدخول (اختياري)</span>
           </Button>
         )}
       </SidebarFooter>

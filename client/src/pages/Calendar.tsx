@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { usePrayerTimes } from "@/contexts/PrayerTimesContext";
+import { AuthReminder } from "@/components/AuthReminder";
 
 interface HijriEvent {
     month: number;
@@ -67,11 +68,14 @@ interface HijriDateInfo {
 }
 
 export default function Calendar() {
-    const { times: prayerTimes, loading: prayerLoading } = usePrayerTimes();
+    const { times: prayerTimes, loading: prayerLoading, preferences } = usePrayerTimes();
     const [hijriDate, setHijriDate] = useState<HijriDateInfo | null>(null);
     const [monthDays, setMonthDays] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDay, setSelectedDay] = useState<any>(null);
+    const [showMonthlyTimes, setShowMonthlyTimes] = useState(false);
+    const [monthlyData, setMonthlyData] = useState<any[]>([]);
     
     // Conversion States
     const [convertGtoH, setConvertGtoH] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -80,6 +84,7 @@ export default function Calendar() {
     const [conversionType, setConversionType] = useState<'GtoH' | 'HtoG'>('GtoH');
 
     const fetchMonthData = async (date: Date) => {
+        if (!preferences) return;
         setLoading(true);
         try {
             const day = date.getDate();
@@ -96,12 +101,20 @@ export default function Calendar() {
                 const hMonth = todayData.data.hijri.month.number;
                 const hYear = todayData.data.hijri.year;
                 
-                // Fetch the full Hijri month calendar
-                const calendarRes = await fetch(`https://api.aladhan.com/v1/hijriCalendar/${hYear}/${hMonth}`);
+                // Fetch the full Hijri month calendar with prayer times
+                const calendarRes = await fetch(
+                    `https://api.aladhan.com/v1/hijriCalendar/${hYear}/${hMonth}?city=${preferences.city}&country=${preferences.country}&method=${preferences.calculation_method}`
+                );
                 const calendarData = await calendarRes.json();
                 
                 if (calendarData.code === 200) {
                     setMonthDays(calendarData.data);
+                    setMonthlyData(calendarData.data);
+                    // Set today as selected day by default
+                    const today = calendarData.data.find((d: any) => 
+                        parseInt(d.hijri.day) === parseInt(todayData.data.hijri.day)
+                    );
+                    if (today) setSelectedDay(today);
                 }
             }
         } catch (error) {
@@ -114,7 +127,7 @@ export default function Calendar() {
 
     // Special handler for next/prev month to ensure we get the right Hijri month
     const handleMonthChange = async (direction: 'next' | 'prev') => {
-        if (!hijriDate) return;
+        if (!hijriDate || !preferences) return;
         
         setLoading(true);
         try {
@@ -137,13 +150,16 @@ export default function Calendar() {
                 }
             }
             
-            const calendarRes = await fetch(`https://api.aladhan.com/v1/hijriCalendar/${nextHYear}/${nextHMonth}`);
+            const calendarRes = await fetch(
+                `https://api.aladhan.com/v1/hijriCalendar/${nextHYear}/${nextHMonth}?city=${preferences.city}&country=${preferences.country}&method=${preferences.calculation_method}`
+            );
             const calendarData = await calendarRes.json();
             
             if (calendarData.code === 200) {
                 setMonthDays(calendarData.data);
                 // Update hijriDate to the first day of the new month to update the UI
                 setHijriDate(calendarData.data[0].hijri);
+                setSelectedDay(calendarData.data[0]);
                 // Update the Gregorian reference date
                 const [gDay, gMonth, gYear] = calendarData.data[0].gregorian.date.split('-');
                 setCurrentDate(new Date(parseInt(gYear), parseInt(gMonth) - 1, parseInt(gDay)));
@@ -156,8 +172,10 @@ export default function Calendar() {
     };
 
     useEffect(() => {
-        fetchMonthData(currentDate);
-    }, [currentDate]);
+        if (preferences) {
+            fetchMonthData(currentDate);
+        }
+    }, [currentDate, preferences]);
 
     const handleGtoHConvert = async () => {
         try {
@@ -243,6 +261,9 @@ export default function Calendar() {
 
     return (
         <div className="min-h-screen bg-background text-foreground p-4 font-arabic" dir="rtl">
+            <div className="max-w-4xl mx-auto pt-4">
+                <AuthReminder message="سجل دخولك لمزامنة تقويمك وتلقي تنبيهات بالمناسبات الإسلامية" />
+            </div>
             <div className="max-w-4xl mx-auto space-y-6 pb-24">
                 
                 {/* Header - Modern & Clear */}
@@ -288,6 +309,26 @@ export default function Calendar() {
                     {/* Main Calendar Section */}
                     <div className="lg:col-span-2 space-y-6">
                         <Card className="rounded-3xl border-border/40 shadow-sm overflow-hidden">
+                            <div className="flex items-center justify-between p-4 bg-muted/10 border-b">
+                                <div className="flex items-center bg-muted p-1 rounded-xl">
+                                    <Button 
+                                        variant={!showMonthlyTimes ? "secondary" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setShowMonthlyTimes(false)}
+                                        className="rounded-lg text-xs"
+                                    >
+                                        التقويم
+                                    </Button>
+                                    <Button 
+                                        variant={showMonthlyTimes ? "secondary" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setShowMonthlyTimes(true)}
+                                        className="rounded-lg text-xs"
+                                    >
+                                        مواقيت الشهر
+                                    </Button>
+                                </div>
+                            </div>
                             <CardContent className="p-0">
                                 {/* Calendar Month Header */}
                                 <div className="flex items-center justify-between p-6 bg-muted/30 border-b">
@@ -304,15 +345,53 @@ export default function Calendar() {
 
                                 {/* Calendar Grid */}
                                 <div className="p-6">
-                                    <div className="grid grid-cols-7 mb-4">
-                                        {weekdays.map(day => (
-                                            <div key={day.en} className="text-center text-[10px] md:text-xs font-bold text-muted-foreground pb-2">
-                                                {day.ar}
+                                    {showMonthlyTimes ? (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm text-right">
+                                                <thead>
+                                                    <tr className="border-b border-border/40 text-muted-foreground">
+                                                        <th className="p-2 font-bold text-xs">اليوم</th>
+                                                        <th className="p-2 font-bold text-xs">ميلادي</th>
+                                                        <th className="p-2 font-bold text-xs">هجري</th>
+                                                        <th className="p-2 font-bold text-xs">الفجر</th>
+                                                        <th className="p-2 font-bold text-xs">الظهر</th>
+                                                        <th className="p-2 font-bold text-xs">العصر</th>
+                                                        <th className="p-2 font-bold text-xs">المغرب</th>
+                                                        <th className="p-2 font-bold text-xs">العشاء</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {monthlyData.map((day: any, i: number) => {
+                                                        const isToday = hijriDate && 
+                                                                       day.hijri.day === hijriDate.day && 
+                                                                       day.hijri.month.number === hijriDate.month.number;
+                                                        return (
+                                                            <tr key={i} className={`border-b border-border/10 hover:bg-primary/5 transition-colors ${isToday ? 'bg-primary/10' : ''}`}>
+                                                                <td className="p-2 font-medium text-xs">{day.hijri.weekday.ar}</td>
+                                                                <td className="p-2 text-[10px]">{day.gregorian.day}/{day.gregorian.month.number}</td>
+                                                                <td className="p-2 text-[10px]">{day.hijri.day}</td>
+                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Fajr.split(' ')[0]}</td>
+                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Dhuhr.split(' ')[0]}</td>
+                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Asr.split(' ')[0]}</td>
+                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Maghrib.split(' ')[0]}</td>
+                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Isha.split(' ')[0]}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="grid grid-cols-7 mb-4">
+                                                {weekdays.map(day => (
+                                                    <div key={day.en} className="text-center text-[10px] md:text-xs font-bold text-muted-foreground pb-2">
+                                                        {day.ar}
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
 
-                                    <div className="grid grid-cols-7 gap-1 md:gap-2">
+                                            <div className="grid grid-cols-7 gap-1 md:gap-2">
                                         {loading ? (
                                             Array.from({ length: 35 }).map((_, i) => (
                                                 <div key={`skeleton-${i}`} className="aspect-square bg-muted/20 animate-pulse rounded-2xl" />
@@ -328,42 +407,60 @@ export default function Calendar() {
                                                                    day.hijri.day === hijriDate.day && 
                                                                    day.hijri.month.number === hijriDate.month.number;
                                                     
+                                                    const isSelected = selectedDay && 
+                                                                      day.hijri.day === selectedDay.hijri.day && 
+                                                                      day.hijri.month.number === selectedDay.hijri.month.number;
+
                                                     const event = ISLAMIC_EVENTS.find(e => 
                                                         e.month === day.hijri.month.number && e.day === parseInt(day.hijri.day)
                                                     );
 
                                                     return (
-                                                        <div 
+                                                        <button 
                                                             key={idx} 
+                                                            onClick={() => setSelectedDay(day)}
                                                             className={`
-                                                                relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all cursor-default group border
-                                                                ${isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 z-10 border-primary" : "hover:bg-muted/50 border-transparent"}
-                                                                ${event && !isToday ? "ring-1 ring-primary/30 bg-primary/5 border-primary/10" : ""}
+                                                                relative aspect-square flex flex-col items-center justify-between p-1.5 md:p-2 rounded-2xl transition-all border
+                                                                ${isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 z-10 border-primary" : ""}
+                                                                ${isSelected && !isToday ? "bg-primary/10 border-primary shadow-sm" : ""}
+                                                                ${!isToday && !isSelected ? "hover:bg-muted/50 border-transparent" : ""}
+                                                                ${event && !isToday && !isSelected ? "bg-primary/5 border-primary/10" : ""}
                                                             `}
                                                         >
-                                                            <span className={`text-base md:text-xl font-bold ${isToday ? "" : "text-foreground"}`}>
-                                                                {parseInt(day.hijri.day)}
-                                                            </span>
-                                                            <div className="flex items-center gap-1 mt-0.5">
-                                                                <span className={`text-[8px] md:text-[9px] font-medium ${isToday ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                                                                    {day.gregorian.day}
+                                                            <div className="w-full flex justify-between items-start">
+                                                                <span className={`text-base md:text-xl font-bold leading-none ${isToday ? "" : "text-foreground"}`}>
+                                                                    {parseInt(day.hijri.day)}
                                                                 </span>
-                                                                <span className={`text-[7px] md:text-[8px] opacity-40 ${isToday ? "text-primary-foreground/60" : "text-muted-foreground/60"}`}>
-                                                                    {day.gregorian.month.en.substring(0, 3)}
-                                                                </span>
+                                                                {event && (
+                                                                    <div className={`w-1.5 h-1.5 rounded-full ${isToday ? "bg-white" : "bg-primary"}`} />
+                                                                )}
+                                                            </div>
+
+                                                            <div className="w-full flex flex-col items-center gap-0.5">
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className={`text-[9px] md:text-xs font-bold ${isToday ? "text-primary-foreground/90" : "text-muted-foreground"}`}>
+                                                                        {day.gregorian.day}
+                                                                    </span>
+                                                                    <span className={`text-[8px] md:text-[10px] opacity-60 ${isToday ? "text-primary-foreground/70" : "text-muted-foreground/60"}`}>
+                                                                        {day.gregorian.month.en.substring(0, 3)}
+                                                                    </span>
+                                                                </div>
+                                                                
+                                                                {/* Optional: Small prayer time indicator (Fajr or Maghrib) */}
+                                                                {!loading && day.timings && (
+                                                                    <div className={`text-[7px] md:text-[8px] font-bold opacity-60 ${isToday ? "text-white" : "text-primary"}`}>
+                                                                        {day.timings.Fajr}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                             
-                                                            {event && (
-                                                                <div className={`absolute -bottom-1 w-1.5 h-1.5 rounded-full ${isToday ? "bg-white" : "bg-primary"}`} />
-                                                            )}
-                                                            
-                                                            {/* Tooltip on hover (Simulated with group-hover) */}
+                                                            {/* Tooltip on hover */}
                                                             {event && (
                                                                 <div className="absolute bottom-full mb-2 hidden group-hover:block z-20 w-32 p-2 bg-popover text-popover-foreground text-[10px] rounded-lg shadow-xl border border-border">
                                                                     {event.title}
                                                                 </div>
                                                             )}
-                                                        </div>
+                                                        </button>
                                                     );
                                                 })}
                                             </>
@@ -411,17 +508,21 @@ export default function Calendar() {
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="font-bold flex items-center gap-2">
                                         <Clock className="w-4 h-4 text-primary" />
-                                        مواقيت الصلاة اليوم
+                                        مواقيت الصلاة {selectedDay ? (
+                                            parseInt(selectedDay.hijri.day) === parseInt(hijriDate?.day || "") ? "اليوم" : `يوم ${selectedDay.hijri.day}`
+                                        ) : "اليوم"}
                                     </h3>
-                                    <span className="text-[10px] text-muted-foreground">{hijriDate?.weekday.ar}</span>
+                                    <span className="text-[10px] text-muted-foreground">
+                                        {selectedDay ? selectedDay.hijri.weekday.ar : hijriDate?.weekday.ar}
+                                    </span>
                                 </div>
-                                {prayerLoading ? (
+                                {loading ? (
                                     <div className="space-y-3">
                                         {[1,2,3,4,5].map(i => <div key={i} className="h-8 bg-muted animate-pulse rounded-lg" />)}
                                     </div>
-                                ) : prayerTimes ? (
+                                ) : (selectedDay?.timings || prayerTimes) ? (
                                     <div className="space-y-3">
-                                        {Object.entries(prayerTimes).filter(([name]) => ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(name)).map(([name, time]) => (
+                                        {Object.entries(selectedDay?.timings || prayerTimes).filter(([name]) => ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(name)).map(([name, time]) => (
                                             <div key={name} className="flex items-center justify-between p-2 rounded-xl hover:bg-white/50 transition-colors">
                                                 <span className="text-sm font-medium">
                                                     {name === "Fajr" ? "الفجر" : name === "Dhuhr" ? "الظهر" : name === "Asr" ? "العصر" : name === "Maghrib" ? "المغرب" : "العشاء"}
@@ -432,7 +533,7 @@ export default function Calendar() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-4 text-xs text-muted-foreground">
-                                        يرجى ضبط الموقع في الإعدادات
+                                        جاري تحميل المواقيت...
                                     </div>
                                 )}
                             </CardContent>

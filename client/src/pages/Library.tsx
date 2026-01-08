@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Book as BookIcon, ExternalLink, FileText, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { AuthReminder } from "@/components/AuthReminder";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function Library() {
     const [books, setBooks] = useState<any[]>([]);
@@ -33,8 +35,9 @@ export default function Library() {
     const sunniBooks = books.filter(b => b.category === "sunni");
 
     return (
-        <div className="container mx-auto p-6 space-y-8 animate-in fade-in duration-500">
-            <header className="text-center space-y-4">
+    <div className="container mx-auto p-6 space-y-8 animate-in fade-in duration-500">
+      <AuthReminder className="mb-4" />
+      <header className="text-center space-y-4">
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-800 bg-clip-text text-transparent">
                     المكتبة الإسلامية
                 </h1>

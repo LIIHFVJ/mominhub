@@ -20,6 +20,7 @@ import { usePrayerTimes } from "@/contexts/PrayerTimesContext";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { BookMarked, ArrowLeft } from "lucide-react";
+import { AuthReminder } from "@/components/AuthReminder";
 
 export default function Home() {
   const { user, signInWithGoogle } = useAuth();
@@ -35,6 +36,38 @@ export default function Home() {
     tasbeeh: 0,
     quranMinutes: 0
   });
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+
+  const ISLAMIC_EVENTS = [
+    { month: 1, day: 1, title: "رأس السنة الهجرية" },
+    { month: 1, day: 10, title: "يوم عاشوراء" },
+    { month: 3, day: 12, title: "المولد النبوي الشريف" },
+    { month: 7, day: 27, title: "الإسراء والمعراج" },
+    { month: 8, day: 15, title: "ليلة النصف من شعبان" },
+    { month: 9, day: 1, title: "بداية شهر رمضان" },
+    { month: 9, day: 27, title: "ليلة القدر" },
+    { month: 10, day: 1, title: "عيد الفطر المبارك" },
+    { month: 12, day: 10, title: "عيد الأضحى المبارك" },
+    { month: 12, day: 18, title: "عيد الغدير" },
+  ];
+
+  const HIJRI_MONTHS = [
+    "محرم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة",
+    "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+  ];
+
+  useEffect(() => {
+    if (prayerDate) {
+      const hMonth = prayerDate.hijri.month.number;
+      const hDay = parseInt(prayerDate.hijri.day);
+      
+      const events = ISLAMIC_EVENTS.filter(e => 
+        (e.month === hMonth && e.day >= hDay) || (e.month > hMonth)
+      ).slice(0, 3);
+      
+      setUpcomingEvents(events);
+    }
+  }, [prayerDate]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -179,16 +212,22 @@ export default function Home() {
             الإسلامية
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
-              <Button size="lg" asChild className="group">
-                <a href="/quran" className="flex items-center gap-2">
-                  ابدأ الآن
-                  <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                </a>
-              </Button>
-            ) : (
-              <GoogleLoginButton size="lg" text="ابدأ رحلتك (تسجيل الدخول)" />
-            )}
+            <Button size="lg" asChild className="group shadow-lg hover:shadow-primary/20 transition-all">
+              <a href="/quran" className="flex items-center gap-2">
+                ابدأ الآن
+                <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </a>
+            </Button>
+            
+            {!user ? (
+              <GoogleLoginButton 
+                size="lg" 
+                variant="outline" 
+                text="تسجيل الدخول (اختياري)" 
+                className="backdrop-blur-sm border-primary/20 hover:bg-primary/5 transition-all"
+              />
+            ) : null}
+
             <Button
               size="lg"
               variant="outline"
@@ -326,8 +365,50 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Upcoming Islamic Events */}
+      <section className="px-4 mb-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-4 px-2">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              المناسبات القادمة
+            </h2>
+            <Button variant="ghost" size="sm" asChild className="text-primary hover:text-primary/80">
+              <a href="/calendar" className="flex items-center gap-1">
+                عرض التقويم بالكامل
+                <ArrowLeft className="w-4 h-4" />
+              </a>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event, i) => (
+                <Card key={i} className="p-4 bg-white/50 dark:bg-card/50 border-primary/10 hover:border-primary/30 transition-all hover:shadow-md cursor-pointer group" onClick={() => window.location.href = '/calendar'}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground line-clamp-1">{event.title}</h3>
+                      <p className="text-[10px] text-muted-foreground">
+                        {event.day} {HIJRI_MONTHS[event.month - 1]}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-6 bg-muted/20 rounded-2xl text-muted-foreground text-sm italic">
+                لا توجد مناسبات قريبة مسجلة
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Personal Daily Achievements */}
-      {user && (
+      {user ? (
         <section className="px-4 mb-8">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -369,6 +450,15 @@ export default function Home() {
                 <p className="text-[10px] mt-2 text-muted-foreground">الهدف اليومي: 15 دقيقة</p>
               </Card>
             </div>
+          </div>
+        </section>
+      ) : (
+        <section className="px-4 mb-8">
+          <div className="max-w-4xl mx-auto">
+            <AuthReminder 
+              message="سجل دخولك لتتبع إنجازاتك اليومية، وحفظ مكان توقفك في القراءة، ومزامنة مفضلاتك"
+              className="mb-4"
+            />
           </div>
         </section>
       )}

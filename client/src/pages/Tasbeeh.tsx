@@ -5,6 +5,7 @@ import { RotateCcw, Plus, Minus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
+import { AuthReminder } from "@/components/AuthReminder";
 
 export default function Tasbeeh() {
   const { user } = useAuth();
@@ -199,13 +200,7 @@ export default function Tasbeeh() {
         </Card>
 
         {/* Auth Message */}
-        {!user && (
-          <Card className="p-5 mt-6 bg-primary/5 border-l-4 border-primary">
-            <p className="text-sm text-center font-medium">
-              سجل الدخول لحفظ العداد الخاص بك عبر جميع أجهزتك
-            </p>
-          </Card>
-        )}
+        <AuthReminder className="mt-6" />
       </div>
     </div>
   );

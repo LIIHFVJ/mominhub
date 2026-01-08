@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ADHKAR_CATEGORIES } from "@shared/islamic-data";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
+import { AuthReminder } from "@/components/AuthReminder";
 
 export default function Adhkar() {
   const { user } = useAuth();
@@ -183,6 +184,7 @@ export default function Adhkar() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background p-4">
       <div className="max-w-4xl mx-auto">
+        <AuthReminder className="mb-8" />
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-3 mb-4">

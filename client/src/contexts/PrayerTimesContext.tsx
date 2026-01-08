@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 interface PrayerTimesContextType {
     times: PrayerTimes | null;
     nextPrayer: { name: string; time: string; remaining: string } | null;
+    preferences: any | null;
     date: {
         hijri: {
             month: { ar: string, number: number };
@@ -36,29 +37,41 @@ export const PrayerTimesProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // 1. Load preferences
     useEffect(() => {
-        if (!user) return;
-
         async function loadPrefs() {
-            if (!user?.id) return;
-            const { data } = await supabase
-                .from('user_preferences')
-                .select('*')
-                .eq('user_id', user.id)
-                .single();
+            if (user?.id) {
+                const { data } = await supabase
+                    .from('user_preferences')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
 
-            if (data) setPreferences(data);
+                if (data) {
+                    setPreferences(data);
+                    return;
+                }
+            }
+            
+            // Default preferences for guests or if not set
+            setPreferences({
+                city: 'Baghdad',
+                country: 'Iraq',
+                calculation_method: 3,
+                notifications_enabled: true,
+                athan_enabled: false,
+                athan_voice: 'makkah',
+                pre_notification_enabled: false,
+                pre_notification_time: 5
+            });
         }
         loadPrefs();
     }, [user]);
 
     // 2. Fetch prayer times
     useEffect(() => {
-        if (!preferences?.country || !preferences?.city) {
-            setLoading(false);
-            return;
-        }
+        if (!preferences?.country || !preferences?.city) return;
 
         async function updateTimes() {
+            setLoading(true);
             const data = await fetchPrayerTimes(preferences.city, preferences.country, preferences.calculation_method);
             if (data) {
                 setTimes(data.timings);
@@ -146,7 +159,7 @@ export const PrayerTimesProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     return (
-        <PrayerTimesContext.Provider value={{ times, nextPrayer, date: dateInfo, loading }}>
+        <PrayerTimesContext.Provider value={{ times, nextPrayer, preferences, date: dateInfo, loading }}>
             {children}
         </PrayerTimesContext.Provider>
     );

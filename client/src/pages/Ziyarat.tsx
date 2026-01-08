@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ADHKAR_CATEGORIES } from "@shared/islamic-data";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
+import { AuthReminder } from "@/components/AuthReminder";
 
 export default function Ziyarat() {
     const { user } = useAuth();
@@ -162,8 +163,11 @@ export default function Ziyarat() {
     );
 
     return (
-        <div className="min-h-screen bg-[#FDFCF7] dark:bg-background pb-20">
-            {/* Header */}
+    <div className="min-h-screen bg-[#FDFCF7] dark:bg-background pb-20">
+      <div className="container mx-auto px-4 pt-4">
+        <AuthReminder className="mb-4" />
+      </div>
+      {/* Header */}
             <div className="bg-primary/10 border-b border-primary/20 pt-12 pb-8">
                 <div className="container mx-auto px-4 text-center">
                     <motion.div

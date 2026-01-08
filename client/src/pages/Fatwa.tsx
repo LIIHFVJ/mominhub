@@ -3,6 +3,7 @@ import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { AuthReminder } from "@/components/AuthReminder";
 
 export default function Fatwa() {
     const [messages, setMessages] = useState<Message[]>([
@@ -49,8 +50,9 @@ export default function Fatwa() {
     };
 
     return (
-        <div className="container mx-auto p-4 max-w-4xl space-y-6 animate-in fade-in duration-500">
-            <header className="text-center space-y-2">
+    <div className="container mx-auto p-4 max-w-4xl space-y-6 animate-in fade-in duration-500">
+      <AuthReminder className="mb-4" />
+      <header className="text-center space-y-2">
                 <h1 className="text-3xl font-bold text-primary">الاستشارة الفقهية الذكية</h1>
                 <p className="text-muted-foreground">احصل على إجابات موثقة وسريعة لأسئلتك الشرعية</p>
             </header>

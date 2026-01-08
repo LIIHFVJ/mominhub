@@ -58,7 +58,7 @@ function MobileNav() {
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
           >
             <User className="h-5 w-5" />
-            <span className="text-[10px]">دخول</span>
+            <span className="text-[10px]">دخول (اختياري)</span>
           </button>
         )}
       </div>
@@ -73,24 +73,68 @@ function TopHeader() {
   const getPageTitle = () => {
     switch (location) {
       case "/": return "الرئيسية";
-      case "/quran": return "القرآن الكريم";
-      case "/library": return "المكتبة الإسلامية";
-      case "/adhkar": return "الأذكار والأدعية";
-      case "/ziyarat": return "الزيارات الشريفة";
-      case "/tasbeeh": return "التسبيح الرقمي";
-      case "/qibla": return "بوصلة القبلة";
-      case "/calendar": return "التقويم الهجري";
-      case "/fatwa": return "الاستشارة الفقهية";
-      case "/favorites": return "المفضلة";
+      case "/quran": return "القرآن الكريم - تلاوة واستماع";
+      case "/library": return "المكتبة الإسلامية - كتب ومصادر";
+      case "/adhkar": return "الأذكار والأدعية - حصن المسلم";
+      case "/ziyarat": return "الزيارات الشريفة - مأثورات";
+      case "/tasbeeh": return "التسبيح الرقمي - مسبحة إلكترونية";
+      case "/qibla": return "بوصلة القبلة - تحديد الاتجاه";
+      case "/calendar": return "التقويم الهجري والميلادي";
+      case "/fatwa": return "الاستشارة الفقهية - أسئلة وأجوبة";
+      case "/favorites": return "المفضلة - محتواي المحفوظ";
       case "/settings": return "الإعدادات";
       case "/admin": return "لوحة التحكم";
       default: return "رفيق المؤمن";
     }
   };
 
+  const getPageDescription = () => {
+    switch (location) {
+      case "/": return "رفيق المؤمن - منصة إسلامية شاملة تجمع القرآن الكريم، الأذكار، الأدعية، المكتبة الإسلامية، وأوقات الصلاة.";
+      case "/quran": return "اقرأ واستمع للقرآن الكريم بتلاوات مختلفة لأشهر القراء مع التفسير والترجمة.";
+      case "/library": return "مجموعة واسعة من الكتب والمصادر الإسلامية القيمة للبحث والقراءة.";
+      case "/adhkar": return "مجموعة شاملة من الأذكار اليومية والأدعية المأثورة من الكتاب والسنة.";
+      case "/ziyarat": return "زيارات المعصومين عليهم السلام والأدعية المخصوصة بالمشاهد المشرفة.";
+      case "/tasbeeh": return "سبحة إلكترونية متطورة تساعدك على ذكر الله وتسبيحه في كل وقت.";
+      case "/qibla": return "حدد اتجاه القبلة بدقة من أي مكان في العالم باستخدام بوصلة القبلة المتطورة.";
+      case "/calendar": return "التقويم الهجري والميلادي مع عرض المناسبات الدينية وأوقات الصلاة لكل يوم.";
+      case "/fatwa": return "احصل على إجابات لاستشاراتك الفقهية والدينية من خلال قسم الاستشارة الفقهية.";
+      default: return "رفيق المؤمن - منصة إسلامية شاملة لكل ما يحتاجه المسلم في يومه.";
+    }
+  };
+
   useEffect(() => {
     const title = getPageTitle();
-    document.title = title === "رفيق المؤمن" ? title : `${title} - رفيق المؤمن`;
+    const fullTitle = title === "رفيق المؤمن" ? title : `${title} - رفيق المؤمن`;
+    document.title = fullTitle;
+
+    // Update Meta Tags dynamically
+    const description = getPageDescription();
+    
+    // Description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', description);
+    }
+
+    // OG Title
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+      ogTitle.setAttribute('content', fullTitle);
+    }
+
+    // OG Description
+    let ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) {
+      ogDescription.setAttribute('content', description);
+    }
+
+    // Canonical
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      const url = `https://rafiq-al-momin.com${location === '/' ? '' : location}`;
+      canonical.setAttribute('href', url);
+    }
   }, [location]);
 
   return (
@@ -114,8 +158,8 @@ function TopHeader() {
           </Button>
           
           {!user && (
-            <Button variant="default" size="sm" className="hidden sm:flex" onClick={() => signInWithGoogle()}>
-              تسجيل الدخول
+            <Button variant="outline" size="sm" className="hidden sm:flex border-primary/20 hover:bg-primary/5" onClick={() => signInWithGoogle()}>
+              تسجيل الدخول (اختياري)
             </Button>
           )}
         </div>

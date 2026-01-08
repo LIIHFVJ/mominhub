@@ -109,6 +109,8 @@ export default function Qibla() {
                     <p className="opacity-70">تقنية الواقع المعزز لتحديد دقيق للقبلة</p>
                 </header>
 
+                <AuthReminder message="سجل دخولك لحفظ مواقعك المفضلة ومزامنة بياناتك عبر أجهزتك" />
+
                 <div className="flex justify-center gap-4">
                     <Button
                         onClick={() => setArMode(false)}

@@ -3,8 +3,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Trash2, BookOpen, Sparkles, Wind } from "lucide-react";
+import { Heart, Trash2, BookOpen, Sparkles, Wind, User } from "lucide-react";
 import { toast } from "sonner";
+import { AuthReminder } from "@/components/AuthReminder";
 
 interface FavoriteItem {
     id: string;
@@ -72,10 +73,16 @@ export default function Favorites() {
 
     if (!user) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center">
-                <Heart className="w-16 h-16 text-muted-foreground mb-4 opacity-20" />
-                <h2 className="text-2xl font-bold mb-2">المفضلة</h2>
-                <p className="text-muted-foreground mb-4">يرجى تسجيل الدخول لعرض مفضلتك</p>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 text-center max-w-2xl mx-auto space-y-8">
+                <div className="relative">
+                    <Heart className="w-24 h-24 text-primary mb-4 opacity-10" />
+                    <Heart className="w-12 h-12 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                    <h2 className="text-3xl font-bold">المفضلة</h2>
+                    <p className="text-muted-foreground">قم بتسجيل الدخول للبدء في حفظ آياتك وأذكارك المفضلة ومزامنتها عبر جميع أجهزتك</p>
+                </div>
+                <AuthReminder message="تسجيل الدخول يتيح لك حفظ ومزامنة مفضلاتك" />
             </div>
         );
     }
