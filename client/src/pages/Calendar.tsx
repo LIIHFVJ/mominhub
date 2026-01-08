@@ -86,19 +86,18 @@ export default function Calendar() {
     const fetchMonthData = async (date: Date) => {
         setLoading(true);
         try {
-            const day = date.getDate();
-            const month = date.getMonth() + 1;
-            const year = date.getFullYear();
+            const dateStr = format(date, "dd-MM-yyyy");
             
             // Get Hijri info for the requested date
-            const todayRes = await fetch(`https://api.aladhan.com/v1/gToH/${day}-${month}-${year}`);
+            const todayRes = await fetch(`https://api.aladhan.com/v1/gToH/${dateStr}`);
             const todayData = await todayRes.json();
             
             if (todayData.code === 200) {
-                setHijriDate(todayData.data.hijri);
+                const currentHijri = todayData.data.hijri;
+                setHijriDate(currentHijri);
                 
-                const hMonth = todayData.data.hijri.month.number;
-                const hYear = todayData.data.hijri.year;
+                const hMonth = currentHijri.month.number;
+                const hYear = currentHijri.year;
                 
                 // Use preferences or fallback to Makkah
                 const city = preferences?.city || "Makkah";
@@ -116,20 +115,19 @@ export default function Calendar() {
                     setMonthlyData(calendarData.data);
                     
                     const today = calendarData.data.find((d: any) => 
-                        parseInt(d.hijri.day) === parseInt(todayData.data.hijri.day)
+                        parseInt(d.date.hijri.day) === parseInt(currentHijri.day)
                     );
                     if (today) setSelectedDay(today);
                 }
             }
         } catch (error) {
-            console.error(error);
+            console.error("Fetch Error:", error);
             toast.error("خطأ في تحميل البيانات");
         } finally {
             setLoading(false);
         }
     };
 
-    // Special handler for next/prev month
     const handleMonthChange = async (direction: 'next' | 'prev') => {
         if (!hijriDate) return;
         
@@ -163,14 +161,18 @@ export default function Calendar() {
             );
             const calendarData = await calendarRes.json();
             
-            if (calendarData.code === 200) {
+            if (calendarData.code === 200 && calendarData.data.length > 0) {
                 setMonthDays(calendarData.data);
-                setHijriDate(calendarData.data[0].hijri);
-                setSelectedDay(calendarData.data[0]);
-                const [gDay, gMonth, gYear] = calendarData.data[0].gregorian.date.split('-');
+                setMonthlyData(calendarData.data);
+                const firstDayOfNewMonth = calendarData.data[0];
+                setHijriDate(firstDayOfNewMonth.date.hijri);
+                setSelectedDay(firstDayOfNewMonth);
+                
+                const [gDay, gMonth, gYear] = firstDayOfNewMonth.date.gregorian.date.split('-');
                 setCurrentDate(new Date(parseInt(gYear), parseInt(gMonth) - 1, parseInt(gDay)));
             }
         } catch (error) {
+            console.error("Month Change Error:", error);
             toast.error("خطأ في التنقل بين الشهور");
         } finally {
             setLoading(false);
@@ -339,24 +341,24 @@ export default function Calendar() {
                             ))
                         ) : (
                             <>
-                                {monthDays.length > 0 && Array.from({ length: weekdays.findIndex(d => d.ar === monthDays[0].weekday.ar) }).map((_, i) => (
+                                {monthDays.length > 0 && Array.from({ length: weekdays.findIndex(d => d.en === monthDays[0].date.hijri.weekday.en) }).map((_, i) => (
                                     <div key={`pad-${i}`} className="aspect-square" />
                                 ))}
                                 
                                 {monthDays.map((day, idx) => {
-                                    const hDay = parseInt(day.hijri.day);
+                                    const hDay = parseInt(day.date.hijri.day);
                                     const isToday = hijriDate && 
-                                                   day.hijri.day === hijriDate.day && 
-                                                   day.hijri.month.number === hijriDate.month.number;
+                                                   day.date.hijri.day === hijriDate.day && 
+                                                   day.date.hijri.month.number === hijriDate.month.number;
                                     
                                     const isSelected = selectedDay && 
-                                                      day.hijri.day === selectedDay.hijri.day && 
-                                                      day.hijri.month.number === selectedDay.hijri.month.number;
+                                                      day.date.hijri.day === selectedDay.date.hijri.day && 
+                                                      day.date.hijri.month.number === selectedDay.date.hijri.month.number;
 
                                     // Match the blue color from image (seems to be specific days or events)
                                     const isBlue = [1, 7, 13, 14, 21, 27, 28].includes(hDay);
                                     const event = ISLAMIC_EVENTS.find(e => 
-                                        e.month === day.hijri.month.number && e.day === hDay
+                                        e.month === day.date.hijri.month.number && e.day === hDay
                                     );
 
                                     return (
@@ -396,9 +398,9 @@ export default function Calendar() {
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                                        <Clock className="w-6 h-6 text-primary" />
-                                        توقيت صلاة {selectedDay.hijri.day} {selectedDay.hijri.month.ar}
-                                    </h3>
+                                         <Clock className="w-6 h-6 text-primary" />
+                                         توقيت صلاة {selectedDay.date.hijri.day} {selectedDay.date.hijri.month.ar}
+                                     </h3>
                                     <Button 
                                         variant="ghost" 
                                         size="sm" 
@@ -434,14 +436,14 @@ export default function Calendar() {
                                             </thead>
                                             <tbody>
                                                 {monthlyData.map((day: any, i: number) => (
-                                                    <tr key={i} className="border-t border-white/5 hover:bg-white/5 text-white/80">
-                                                        <td className="p-4">{day.hijri.weekday.ar}</td>
-                                                        <td className="p-4 font-bold">{day.hijri.day}</td>
-                                                        <td className="p-4 text-white/40">{day.gregorian.day}/{day.gregorian.month.number}</td>
-                                                        <td className="p-4 font-bold text-primary">{day.timings.Fajr.split(' ')[0]}</td>
-                                                        <td className="p-4 font-bold text-primary">{day.timings.Maghrib.split(' ')[0]}</td>
-                                                    </tr>
-                                                ))}
+                                                     <tr key={i} className="border-t border-white/5 hover:bg-white/5 text-white/80">
+                                                         <td className="p-4">{day.date.hijri.weekday.ar}</td>
+                                                         <td className="p-4 font-bold">{day.date.hijri.day}</td>
+                                                         <td className="p-4 text-white/40">{day.date.gregorian.day}/{day.date.gregorian.month.number}</td>
+                                                         <td className="p-4 font-bold text-primary">{day.timings.Fajr.split(' ')[0]}</td>
+                                                         <td className="p-4 font-bold text-primary">{day.timings.Maghrib.split(' ')[0]}</td>
+                                                     </tr>
+                                                 ))}
                                             </tbody>
                                         </table>
                                     </div>
