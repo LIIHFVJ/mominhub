@@ -5,6 +5,7 @@ import { MapPin, Smartphone, RotateCcw, Camera, LayoutGrid, Zap, Info } from "lu
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
+import { AuthReminder } from "@/components/AuthReminder";
 
 export default function Qibla() {
     const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
