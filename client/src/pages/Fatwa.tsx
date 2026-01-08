@@ -68,8 +68,23 @@ export default function Fatwa() {
                     { role: "assistant", content: data.answer },
                 ]);
             } else {
-                // If it's a rate limit error or other structured error
-                const errorText = data.error || data.message || `Error ${response.status}`;
+                // Handle structured error from server
+                let errorText = "حدث خطأ غير معروف";
+                
+                if (typeof data.error === 'string') {
+                    errorText = data.error;
+                } else if (data.error && typeof data.error.message === 'string') {
+                    errorText = data.error.message;
+                } else if (typeof data.message === 'string') {
+                    errorText = data.message;
+                } else if (data.message && typeof data.message.error === 'string') {
+                    errorText = data.message.error;
+                } else if (data.message && typeof data.message.message === 'string') {
+                    errorText = data.message.message;
+                } else {
+                    errorText = `Error ${response.status}: ${response.statusText || 'Unknown'}`;
+                }
+                
                 throw new Error(errorText);
             }
         } catch (error: any) {

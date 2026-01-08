@@ -47,7 +47,11 @@ export async function createApp() {
     limit: 100,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
-    message: { error: "لقد تجاوزت الحد المسموح به من الطلبات. يرجى المحاولة لاحقاً." }
+    handler: (req, res) => {
+      res.status(429).json({
+        error: "لقد تجاوزت الحد المسموح به من الطلبات. يرجى المحاولة لاحقاً."
+      });
+    }
   });
   app.use("/api/", limiter);
 
