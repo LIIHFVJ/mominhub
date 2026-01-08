@@ -72,8 +72,8 @@ const ISLAMIC_EVENTS: HijriEvent[] = [
 // Aladhan API Endpoints
 const API_BASE_URL = "https://api.aladhan.com/v1";
 const API_BACKUP_URLS = [
-    "https://alislam.api.islamic.network/v1",
-    "https://aladhan.api.alislam.ru/v1"
+    "https://api.islamic.network/v1",
+    "https://api.aladhan.com/v1" // Fallback to primary if something weird happens with mirror
 ];
 
 /**
@@ -85,7 +85,12 @@ async function fetchWithFallback(endpoint: string) {
 
     for (const baseUrl of urls) {
         try {
-            const res = await fetch(`${baseUrl}${endpoint}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+            const res = await fetch(`${baseUrl}${endpoint}`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             if (res.ok) {
                 const data = await res.json();
                 if (data.code === 200) return data;
@@ -142,13 +147,13 @@ export default function Calendar() {
             const hYear = currentHijri.year;
             
             // Use preferences or fallback to Makkah
-            const city = preferences?.city || "Makkah";
-            const country = preferences?.country || "Saudi Arabia";
+            const city = encodeURIComponent(preferences?.city || "Makkah");
+            const country = encodeURIComponent(preferences?.country || "Saudi Arabia");
             const method = preferences?.calculation_method || 4;
 
             // Fetch the full Hijri month calendar
             const calendarData = await fetchWithFallback(
-                `/hijriCalendar/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
+                `/hijriCalendarByCity/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
             );
             
             setMonthDays(calendarData.data);
@@ -190,12 +195,12 @@ export default function Calendar() {
                 }
             }
             
-            const city = preferences?.city || "Makkah";
-            const country = preferences?.country || "Saudi Arabia";
+            const city = encodeURIComponent(preferences?.city || "Makkah");
+            const country = encodeURIComponent(preferences?.country || "Saudi Arabia");
             const method = preferences?.calculation_method || 4;
 
             const calendarData = await fetchWithFallback(
-                `/hijriCalendar/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
+                `/hijriCalendarByCity/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
             );
             
             if (calendarData.data.length > 0) {
