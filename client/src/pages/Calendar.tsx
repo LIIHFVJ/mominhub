@@ -86,6 +86,7 @@ export default function Calendar() {
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
             
+            // Get Hijri info for the requested date
             const todayRes = await fetch(`https://api.aladhan.com/v1/gToH/${day}-${month}-${year}`);
             const todayData = await todayRes.json();
             
@@ -95,6 +96,7 @@ export default function Calendar() {
                 const hMonth = todayData.data.hijri.month.number;
                 const hYear = todayData.data.hijri.year;
                 
+                // Fetch the full Hijri month calendar
                 const calendarRes = await fetch(`https://api.aladhan.com/v1/hijriCalendar/${hYear}/${hMonth}`);
                 const calendarData = await calendarRes.json();
                 
@@ -105,6 +107,49 @@ export default function Calendar() {
         } catch (error) {
             console.error(error);
             toast.error("خطأ في تحميل البيانات");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Special handler for next/prev month to ensure we get the right Hijri month
+    const handleMonthChange = async (direction: 'next' | 'prev') => {
+        if (!hijriDate) return;
+        
+        setLoading(true);
+        try {
+            let nextHMonth = hijriDate.month.number;
+            let nextHYear = parseInt(hijriDate.year);
+            
+            if (direction === 'next') {
+                if (nextHMonth === 12) {
+                    nextHMonth = 1;
+                    nextHYear++;
+                } else {
+                    nextHMonth++;
+                }
+            } else {
+                if (nextHMonth === 1) {
+                    nextHMonth = 12;
+                    nextHYear--;
+                } else {
+                    nextHMonth--;
+                }
+            }
+            
+            const calendarRes = await fetch(`https://api.aladhan.com/v1/hijriCalendar/${nextHYear}/${nextHMonth}`);
+            const calendarData = await calendarRes.json();
+            
+            if (calendarData.code === 200) {
+                setMonthDays(calendarData.data);
+                // Update hijriDate to the first day of the new month to update the UI
+                setHijriDate(calendarData.data[0].hijri);
+                // Update the Gregorian reference date
+                const [gDay, gMonth, gYear] = calendarData.data[0].gregorian.date.split('-');
+                setCurrentDate(new Date(parseInt(gYear), parseInt(gMonth) - 1, parseInt(gDay)));
+            }
+        } catch (error) {
+            toast.error("خطأ في التنقل بين الشهور");
         } finally {
             setLoading(false);
         }
@@ -149,11 +194,15 @@ export default function Calendar() {
     };
 
     const nextMonth = () => {
-        setCurrentDate(prev => addDays(prev, 30));
+        const next = new Date(currentDate);
+        next.setMonth(next.getMonth() + 1);
+        setCurrentDate(next);
     };
 
     const prevMonth = () => {
-        setCurrentDate(prev => subDays(prev, 30));
+        const prev = new Date(currentDate);
+        prev.setMonth(prev.getMonth() - 1);
+        setCurrentDate(prev);
     };
 
     const goToToday = () => {
@@ -177,7 +226,20 @@ export default function Calendar() {
         return events[0];
     }, [hijriDate]);
 
-    const weekdays = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    const weekdays = [
+        { en: "Sunday", ar: "الأحد" },
+        { en: "Monday", ar: "الاثنين" },
+        { en: "Tuesday", ar: "الثلاثاء" },
+        { en: "Wednesday", ar: "الأربعاء" },
+        { en: "Thursday", ar: "الخميس" },
+        { en: "Friday", ar: "الجمعة" },
+        { en: "Saturday", ar: "السبت" }
+    ];
+
+    const hijriMonths = [
+        "المحرّم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة",
+        "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+    ];
 
     return (
         <div className="min-h-screen bg-background text-foreground p-4 font-arabic" dir="rtl">
@@ -229,13 +291,13 @@ export default function Calendar() {
                             <CardContent className="p-0">
                                 {/* Calendar Month Header */}
                                 <div className="flex items-center justify-between p-6 bg-muted/30 border-b">
-                                    <Button variant="ghost" size="icon" onClick={prevMonth} className="rounded-full">
+                                    <Button variant="ghost" size="icon" onClick={() => handleMonthChange('prev')} className="rounded-full">
                                         <ChevronRight className="w-5 h-5" />
                                     </Button>
                                     <h2 className="text-xl font-bold text-primary flex items-center gap-2">
                                         {hijriDate?.month.ar} {hijriDate?.year} هـ
                                     </h2>
-                                    <Button variant="ghost" size="icon" onClick={nextMonth} className="rounded-full">
+                                    <Button variant="ghost" size="icon" onClick={() => handleMonthChange('next')} className="rounded-full">
                                         <ChevronLeft className="w-5 h-5" />
                                     </Button>
                                 </div>
@@ -244,55 +306,68 @@ export default function Calendar() {
                                 <div className="p-6">
                                     <div className="grid grid-cols-7 mb-4">
                                         {weekdays.map(day => (
-                                            <div key={day} className="text-center text-xs font-bold text-muted-foreground pb-2">
-                                                {day.substring(0, 3)}
+                                            <div key={day.en} className="text-center text-[10px] md:text-xs font-bold text-muted-foreground pb-2">
+                                                {day.ar}
                                             </div>
                                         ))}
                                     </div>
 
                                     <div className="grid grid-cols-7 gap-1 md:gap-2">
-                                        {monthDays.length > 0 && Array.from({ length: weekdays.indexOf(monthDays[0].weekday.ar) }).map((_, i) => (
-                                            <div key={`pad-${i}`} className="aspect-square" />
-                                        ))}
-                                        
-                                        {monthDays.map((day, idx) => {
-                                            const isToday = hijriDate && 
-                                                           day.hijri.day === hijriDate.day && 
-                                                           day.hijri.month.number === hijriDate.month.number;
-                                            
-                                            const event = ISLAMIC_EVENTS.find(e => 
-                                                e.month === day.hijri.month.number && e.day === parseInt(day.hijri.day)
-                                            );
+                                        {loading ? (
+                                            Array.from({ length: 35 }).map((_, i) => (
+                                                <div key={`skeleton-${i}`} className="aspect-square bg-muted/20 animate-pulse rounded-2xl" />
+                                            ))
+                                        ) : (
+                                            <>
+                                                {monthDays.length > 0 && Array.from({ length: weekdays.findIndex(d => d.ar === monthDays[0].weekday.ar) }).map((_, i) => (
+                                                    <div key={`pad-${i}`} className="aspect-square bg-muted/5 rounded-2xl" />
+                                                ))}
+                                                
+                                                {monthDays.map((day, idx) => {
+                                                    const isToday = hijriDate && 
+                                                                   day.hijri.day === hijriDate.day && 
+                                                                   day.hijri.month.number === hijriDate.month.number;
+                                                    
+                                                    const event = ISLAMIC_EVENTS.find(e => 
+                                                        e.month === day.hijri.month.number && e.day === parseInt(day.hijri.day)
+                                                    );
 
-                                            return (
-                                                <div 
-                                                    key={idx} 
-                                                    className={`
-                                                        relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all cursor-default group
-                                                        ${isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 z-10" : "hover:bg-muted/50"}
-                                                        ${event && !isToday ? "ring-1 ring-primary/30 bg-primary/5" : ""}
-                                                    `}
-                                                >
-                                                    <span className={`text-sm md:text-base font-bold ${isToday ? "" : "text-foreground"}`}>
-                                                        {parseInt(day.hijri.day)}
-                                                    </span>
-                                                    <span className={`text-[9px] md:text-[10px] opacity-60 ${isToday ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                                                        {day.gregorian.day}
-                                                    </span>
-                                                    
-                                                    {event && (
-                                                        <div className={`absolute -bottom-1 w-1.5 h-1.5 rounded-full ${isToday ? "bg-white" : "bg-primary"}`} />
-                                                    )}
-                                                    
-                                                    {/* Tooltip on hover (Simulated with group-hover) */}
-                                                    {event && (
-                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block z-20 w-32 p-2 bg-popover text-popover-foreground text-[10px] rounded-lg shadow-xl border border-border">
-                                                            {event.title}
+                                                    return (
+                                                        <div 
+                                                            key={idx} 
+                                                            className={`
+                                                                relative aspect-square flex flex-col items-center justify-center rounded-2xl transition-all cursor-default group border
+                                                                ${isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 z-10 border-primary" : "hover:bg-muted/50 border-transparent"}
+                                                                ${event && !isToday ? "ring-1 ring-primary/30 bg-primary/5 border-primary/10" : ""}
+                                                            `}
+                                                        >
+                                                            <span className={`text-base md:text-xl font-bold ${isToday ? "" : "text-foreground"}`}>
+                                                                {parseInt(day.hijri.day)}
+                                                            </span>
+                                                            <div className="flex items-center gap-1 mt-0.5">
+                                                                <span className={`text-[8px] md:text-[9px] font-medium ${isToday ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                                                                    {day.gregorian.day}
+                                                                </span>
+                                                                <span className={`text-[7px] md:text-[8px] opacity-40 ${isToday ? "text-primary-foreground/60" : "text-muted-foreground/60"}`}>
+                                                                    {day.gregorian.month.en.substring(0, 3)}
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            {event && (
+                                                                <div className={`absolute -bottom-1 w-1.5 h-1.5 rounded-full ${isToday ? "bg-white" : "bg-primary"}`} />
+                                                            )}
+                                                            
+                                                            {/* Tooltip on hover (Simulated with group-hover) */}
+                                                            {event && (
+                                                                <div className="absolute bottom-full mb-2 hidden group-hover:block z-20 w-32 p-2 bg-popover text-popover-foreground text-[10px] rounded-lg shadow-xl border border-border">
+                                                                    {event.title}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
+                                                    );
+                                                })}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
