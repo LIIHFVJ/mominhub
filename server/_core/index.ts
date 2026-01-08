@@ -56,22 +56,23 @@ export async function createApp() {
 
   registerOAuthRoutes(app);
 
-  app.post("/api/fatwa", async (req, res) => {
-    console.log("[Fatwa API] Received request:", req.body);
+  app.post("/api/fatwa", async (req, res, next) => {
+    console.log("[Fatwa API] Received request:", JSON.stringify(req.body));
     try {
       const { question, context } = req.body;
       if (!question) {
+        console.log("[Fatwa API] Missing question");
         return res.status(400).json({ error: "السؤال مطلوب (Question is required)" });
       }
+      
+      console.log("[Fatwa API] Calling Gemini...");
       const answer = await askGemini(question, context);
+      console.log("[Fatwa API] Gemini responded successfully");
+      
       res.json({ answer });
     } catch (error: any) {
-      console.error("Fatwa API Error Details:", error);
-      const isProd = process.env.NODE_ENV === "production";
-      res.status(500).json({ 
-        error: isProd ? "حدث خطأ في الخادم" : `خطأ: ${error.message}`,
-        details: isProd ? undefined : error.stack
-      });
+      console.error("[Fatwa API] Route Error:", error);
+      next(error); // Pass to global error handler
     }
   });
 
@@ -82,6 +83,30 @@ export async function createApp() {
       createContext,
     })
   );
+
+  // Global error handler MUST be after all routes
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("[Global Error Handler] Error:", err.message || err);
+    console.error("[Global Error Handler] Path:", req.path);
+    console.error("[Global Error Handler] OriginalUrl:", req.originalUrl);
+    console.error("[Global Error Handler] Headers:", JSON.stringify(req.headers));
+    
+    // If the request expects JSON or is an API call, ALWAYS return JSON
+    const isApiCall = req.path.includes("/api/") || req.originalUrl.includes("/api/");
+    const wantsJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json"));
+
+    if (isApiCall || wantsJson) {
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(err.status || 500).json({
+        error: "حدث خطأ في الخادم (API Error)",
+        message: err.message || "Unknown error",
+        path: req.path
+      });
+    }
+    
+    // For other routes, send a simple text
+    res.status(err.status || 500).send(`A server error occurred (Global Handler): ${err.message || 'Unknown'}`);
+  });
 
   return app;
 }

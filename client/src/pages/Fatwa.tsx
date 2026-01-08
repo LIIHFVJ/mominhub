@@ -34,11 +34,33 @@ export default function Fatwa() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify({ question: content, context }),
             });
 
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get("content-type");
+            
+            if (contentType && contentType.includes("application/json")) {
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    const text = await response.text();
+                    console.error("Failed to parse JSON response:", text);
+                    throw new Error(`استجابة غير صالحة من الخادم: ${text.substring(0, 100)}`);
+                }
+            } else {
+                const text = await response.text();
+                console.error("Non-JSON response received:", text);
+                
+                // If the text looks like an error message we recognize
+                if (text.includes("A server error occurred")) {
+                    throw new Error("حدث خطأ في خادم الموقع. يرجى مراجعة سجلات الخادم.");
+                }
+                
+                throw new Error(`استجابة غير صالحة من الخادم (ليست JSON): ${text.substring(0, 100)}`);
+            }
 
             if (response.ok) {
                 setMessages((prev) => [

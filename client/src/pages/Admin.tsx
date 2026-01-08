@@ -35,7 +35,8 @@ import {
     Wind,
     Sparkles,
     MessageSquare,
-    BookText
+    BookText,
+    Eye
 } from "lucide-react";
 import { toast } from "sonner";
 import { ADHKAR_CATEGORIES } from "@shared/islamic-data";

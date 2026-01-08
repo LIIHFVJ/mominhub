@@ -36,7 +36,13 @@ export async function askGemini(question: string, context?: 'sunni' | 'shia'): P
 
     try {
         // List of models to try in order of preference
-        const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        const modelsToTry = [
+            "gemini-flash-latest",
+            "gemini-2.0-flash",
+            "gemini-pro-latest",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro"
+        ];
         let lastError: any = null;
         let successfulText: string | null = null;
 
