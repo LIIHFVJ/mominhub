@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
     ChevronRight, ChevronLeft,
     Share2, Calendar as CalendarIcon,
@@ -139,6 +140,7 @@ interface HijriDateInfo {
 }
 
 export default function Calendar() {
+    const { theme } = useTheme();
     const { times: prayerTimes, loading: prayerLoading, preferences } = usePrayerTimes();
     const [hijriDate, setHijriDate] = useState<HijriDateInfo | null>(null);
     const [monthDays, setMonthDays] = useState<any[]>([]);
@@ -356,7 +358,7 @@ export default function Calendar() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-foreground font-arabic" dir="rtl">
+        <div className="min-h-screen bg-background text-foreground font-arabic" dir="rtl">
             {/* Header Section - Pixel Perfect Match */}
             <div className="relative h-72 md:h-80 overflow-hidden">
                 <div 
@@ -366,7 +368,7 @@ export default function Calendar() {
                         filter: 'brightness(0.3)'
                     }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#0a0a0a]" />
+                <div className={`absolute inset-0 bg-gradient-to-b from-transparent ${theme === 'dark' ? 'via-background/50 to-background' : 'via-background/20 to-background'}`} />
                 
                 <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 pt-12">
                     <AnimatePresence mode="wait">
@@ -377,12 +379,12 @@ export default function Calendar() {
                             exit={{ opacity: 0, y: -10 }}
                             className="space-y-4"
                         >
-                            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter">
+                            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter drop-shadow-lg">
                                 {hijriDate ? (
                                     `${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year}`
                                 ) : "..."}
                             </h1>
-                            <p className="text-2xl md:text-3xl text-white/40 font-bold">
+                            <p className="text-2xl md:text-3xl text-white/60 font-bold drop-shadow-md">
                                 هجري
                             </p>
                         </motion.div>
@@ -399,13 +401,13 @@ export default function Calendar() {
                         اليوم
                     </Button>
                     <div className="flex items-center gap-8">
-                        <Button variant="ghost" size="icon" onClick={() => handleMonthChange('prev')} className="text-white/40 hover:text-white hover:bg-white/5 transition-colors">
+                        <Button variant="ghost" size="icon" onClick={() => handleMonthChange('prev')} className="text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                             <ChevronRight className="w-8 h-8" />
                         </Button>
-                        <h2 className="text-3xl font-bold text-white min-w-[120px] text-center">
+                        <h2 className="text-3xl font-bold min-w-[120px] text-center">
                             {hijriDate?.month.ar}
                         </h2>
-                        <Button variant="ghost" size="icon" onClick={() => handleMonthChange('next')} className="text-white/40 hover:text-white hover:bg-white/5 transition-colors">
+                        <Button variant="ghost" size="icon" onClick={() => handleMonthChange('next')} className="text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                             <ChevronLeft className="w-8 h-8" />
                         </Button>
                     </div>
@@ -413,10 +415,10 @@ export default function Calendar() {
                 </div>
 
                 {/* Calendar Grid - Matching the Image */}
-                <div className="bg-[#111] rounded-[2.5rem] p-6 md:p-10 shadow-2xl border border-white/5">
+                <div className="bg-card rounded-[2.5rem] p-6 md:p-10 shadow-2xl border border-border/50">
                     <div className="grid grid-cols-7 mb-10">
                         {weekdays.map(day => (
-                            <div key={day.en} className="text-center text-base font-medium text-white/40">
+                            <div key={day.en} className="text-center text-base font-medium text-muted-foreground">
                                 {day.ar}
                             </div>
                         ))}
@@ -426,7 +428,7 @@ export default function Calendar() {
                         {loading ? (
                             Array.from({ length: 35 }).map((_, i) => (
                                 <div key={`skeleton-${i}`} className="aspect-square flex items-center justify-center">
-                                    <div className="w-12 h-12 bg-white/5 animate-pulse rounded-full" />
+                                    <div className="w-12 h-12 bg-accent animate-pulse rounded-full" />
                                 </div>
                             ))
                         ) : (
@@ -457,10 +459,10 @@ export default function Calendar() {
                                                 onClick={() => setSelectedDay(day)}
                                                 className={`
                                                     w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full transition-all text-2xl font-bold
-                                                    ${isToday ? "bg-[#ea2e2e] text-white shadow-[0_0_20px_rgba(234,46,46,0.4)] scale-110 z-10" : ""}
-                                                    ${!isToday && isSelected ? "border-2 border-white/20 text-white" : ""}
-                                                    ${!isToday && !isSelected && isBlue ? "text-[#3b82f6]" : ""}
-                                                    ${!isToday && !isSelected && !isBlue ? "text-white/80 hover:bg-white/5" : ""}
+                                                    ${isToday ? "bg-destructive text-destructive-foreground shadow-[0_0_20px_rgba(234,46,46,0.4)] scale-110 z-10" : ""}
+                                                    ${!isToday && isSelected ? "border-2 border-primary text-primary" : ""}
+                                                    ${!isToday && !isSelected && isBlue ? "text-blue-500" : ""}
+                                                    ${!isToday && !isSelected && !isBlue ? "text-foreground/80 hover:bg-accent" : ""}
                                                 `}
                                             >
                                                 {hDay}
@@ -483,11 +485,11 @@ export default function Calendar() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="bg-[#111] rounded-[2.5rem] border border-white/5 p-8"
+                            className="bg-card rounded-[2.5rem] border border-border/50 p-8 shadow-xl"
                         >
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                                    <h3 className="text-2xl font-bold flex items-center gap-3">
                                          <Clock className="w-6 h-6 text-primary" />
                                          توقيت صلاة {selectedDay.date.hijri.day} {selectedDay.date.hijri.month.ar}
                                      </h3>
@@ -503,8 +505,8 @@ export default function Calendar() {
 
                                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                                     {Object.entries(selectedDay.timings).filter(([name]) => ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(name)).map(([name, time]) => (
-                                        <div key={name} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col items-center">
-                                            <span className="text-xs text-white/40 mb-1 font-medium">
+                                        <div key={name} className="bg-accent/50 p-4 rounded-2xl border border-border/50 flex flex-col items-center transition-colors hover:bg-accent">
+                                            <span className="text-xs text-muted-foreground mb-1 font-medium">
                                                 {name === "Fajr" ? "الفجر" : name === "Dhuhr" ? "الظهر" : name === "Asr" ? "العصر" : name === "Maghrib" ? "المغرب" : "العشاء"}
                                             </span>
                                             <span className="text-xl font-bold text-primary">{time.split(' ')[0]}</span>
@@ -513,10 +515,10 @@ export default function Calendar() {
                                 </div>
 
                                 {showMonthlyTimes && (
-                                    <div className="mt-8 overflow-x-auto rounded-2xl border border-white/5">
+                                    <div className="mt-8 overflow-x-auto rounded-2xl border border-border/50">
                                         <table className="w-full text-sm text-right">
-                                            <thead className="bg-white/5">
-                                                <tr className="text-white/40">
+                                            <thead className="bg-accent/50">
+                                                <tr className="text-muted-foreground">
                                                     <th className="p-4 font-bold">اليوم</th>
                                                     <th className="p-4 font-bold">هجري</th>
                                                     <th className="p-4 font-bold">ميلادي</th>
@@ -526,10 +528,10 @@ export default function Calendar() {
                                             </thead>
                                             <tbody>
                                                 {monthlyData.map((day: any, i: number) => (
-                                                     <tr key={i} className="border-t border-white/5 hover:bg-white/5 text-white/80">
+                                                     <tr key={i} className="border-t border-border/50 hover:bg-accent/30 text-foreground/80 transition-colors">
                                                          <td className="p-4">{day.date.hijri.weekday.ar}</td>
                                                          <td className="p-4 font-bold">{day.date.hijri.day}</td>
-                                                         <td className="p-4 text-white/40">{day.date.gregorian.day}/{day.date.gregorian.month.number}</td>
+                                                         <td className="p-4 text-muted-foreground">{day.date.gregorian.day}/{day.date.gregorian.month.number}</td>
                                                          <td className="p-4 font-bold text-primary">{day.timings.Fajr.split(' ')[0]}</td>
                                                          <td className="p-4 font-bold text-primary">{day.timings.Maghrib.split(' ')[0]}</td>
                                                      </tr>
@@ -547,33 +549,33 @@ export default function Calendar() {
                 <div className="px-2">
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Card className="bg-[#111] border border-white/5 rounded-[2.5rem] hover:bg-[#161616] transition-all cursor-pointer group p-10">
+                            <Card className="bg-card border border-border/50 rounded-[2.5rem] hover:bg-accent/50 transition-all cursor-pointer group p-10 shadow-xl">
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-3">
-                                        <h4 className="text-3xl font-bold text-white">تحويل التاريخ</h4>
-                                        <p className="text-xl text-white/40 font-medium">تحويل بين التاريخ الهجري والميلادي بدقة</p>
+                                        <h4 className="text-3xl font-bold">تحويل التاريخ</h4>
+                                        <p className="text-xl text-muted-foreground font-medium">تحويل بين التاريخ الهجري والميلادي بدقة</p>
                                     </div>
-                                    <div className="w-20 h-20 rounded-[2rem] bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-primary/20 group-hover:text-primary transition-all duration-500">
+                                    <div className="w-20 h-20 rounded-[2rem] bg-accent flex items-center justify-center text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary transition-all duration-500">
                                         <RefreshCw className="w-10 h-10 group-hover:rotate-180 transition-transform duration-700" />
                                     </div>
                                 </div>
                             </Card>
                         </DialogTrigger>
-                        <DialogContent className="bg-[#0f0f0f] border-white/10 text-white sm:max-w-md rounded-[2.5rem] font-arabic p-8">
+                        <DialogContent className="bg-card border-border/50 sm:max-w-md rounded-[2.5rem] font-arabic p-8 shadow-2xl">
                             <DialogHeader className="mb-8">
                                 <DialogTitle className="text-3xl font-bold text-center">أداة تحويل التاريخ</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-8">
-                                <div className="flex bg-white/5 p-1.5 rounded-2xl">
+                                <div className="flex bg-accent/50 p-1.5 rounded-2xl">
                                      <button 
                                          onClick={() => { setConversionType('GtoH'); setConvertedResult(null); }} 
-                                         className={`flex-1 py-4 text-base font-bold rounded-xl transition-all ${conversionType === 'GtoH' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+                                         className={`flex-1 py-4 text-base font-bold rounded-xl transition-all ${conversionType === 'GtoH' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground/60'}`}
                                      >
                                          ميلادي ← هجري
                                      </button>
                                      <button 
                                          onClick={() => { setConversionType('HtoG'); setConvertedResult(null); }} 
-                                         className={`flex-1 py-4 text-base font-bold rounded-xl transition-all ${conversionType === 'HtoG' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+                                         className={`flex-1 py-4 text-base font-bold rounded-xl transition-all ${conversionType === 'HtoG' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground/60'}`}
                                      >
                                          هجري ← ميلادي
                                      </button>
@@ -582,24 +584,24 @@ export default function Calendar() {
                                 <div className="space-y-6">
                                     {conversionType === 'GtoH' ? (
                                         <div className="space-y-4">
-                                            <label className="text-sm text-white/40 block mr-2">اختر التاريخ الميلادي</label>
+                                            <label className="text-sm text-muted-foreground block mr-2">اختر التاريخ الميلادي</label>
                                             <Input 
                                                 type="date" 
                                                 value={convertGtoH} 
                                                 onChange={(e) => setConvertGtoH(e.target.value)} 
-                                                className="bg-white/5 border-none h-16 rounded-2xl text-right text-xl text-white focus:ring-2 ring-primary/20" 
+                                                className="bg-accent/50 border-none h-16 rounded-2xl text-right text-xl text-foreground focus:ring-2 ring-primary/20" 
                                             />
-                                            <Button onClick={handleGtoHConvert} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20">تحويل الآن</Button>
+                                            <Button onClick={handleGtoHConvert} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20">تحويل الآن</Button>
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            <label className="text-sm text-white/40 block mr-2">أدخل التاريخ الهجري (يوم-شهر-سنة)</label>
+                                            <label className="text-sm text-muted-foreground block mr-2">أدخل التاريخ الهجري (يوم-شهر-سنة)</label>
                                             <div className="grid grid-cols-3 gap-3">
-                                                <Input placeholder="يوم" value={convertHtoG.day} onChange={e => setConvertHtoG(prev => ({ ...prev, day: e.target.value }))} className="bg-white/5 border-none h-16 rounded-2xl text-center text-xl text-white focus:ring-2 ring-primary/20" />
-                                                <Input placeholder="شهر" value={convertHtoG.month} onChange={e => setConvertHtoG(prev => ({ ...prev, month: e.target.value }))} className="bg-white/5 border-none h-16 rounded-2xl text-center text-xl text-white focus:ring-2 ring-primary/20" />
-                                                <Input placeholder="سنة" value={convertHtoG.year} onChange={e => setConvertHtoG(prev => ({ ...prev, year: e.target.value }))} className="bg-white/5 border-none h-16 rounded-2xl text-center text-xl text-white focus:ring-2 ring-primary/20" />
+                                                <Input placeholder="يوم" value={convertHtoG.day} onChange={e => setConvertHtoG(prev => ({ ...prev, day: e.target.value }))} className="bg-accent/50 border-none h-16 rounded-2xl text-center text-xl text-foreground focus:ring-2 ring-primary/20" />
+                                                <Input placeholder="شهر" value={convertHtoG.month} onChange={e => setConvertHtoG(prev => ({ ...prev, month: e.target.value }))} className="bg-accent/50 border-none h-16 rounded-2xl text-center text-xl text-foreground focus:ring-2 ring-primary/20" />
+                                                <Input placeholder="سنة" value={convertHtoG.year} onChange={e => setConvertHtoG(prev => ({ ...prev, year: e.target.value }))} className="bg-accent/50 border-none h-16 rounded-2xl text-center text-xl text-foreground focus:ring-2 ring-primary/20" />
                                             </div>
-                                            <Button onClick={handleHtoGConvert} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20">تحويل الآن</Button>
+                                            <Button onClick={handleHtoGConvert} className="w-full h-16 rounded-2xl text-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20">تحويل الآن</Button>
                                         </div>
                                     )}
                                 </div>
@@ -611,7 +613,7 @@ export default function Calendar() {
                                         className="p-8 rounded-3xl bg-primary/10 border border-primary/20 text-center space-y-2"
                                     >
                                         <p className="text-sm text-primary/60 font-medium">النتيجة</p>
-                                        <p className="text-3xl font-black text-white">
+                                        <p className="text-3xl font-black">
                                             {convertedResult.type === 'hijri' ? (
                                                 `${convertedResult.data.day} ${convertedResult.data.month.ar} ${convertedResult.data.year} هـ`
                                             ) : (
@@ -627,28 +629,28 @@ export default function Calendar() {
 
                 {/* Upcoming Event - Exact Match to Image */}
                 <div className="space-y-6">
-                    <h3 className="text-3xl font-bold text-white px-2">الحدث القادم</h3>
+                    <h3 className="text-3xl font-bold px-2">الحدث القادم</h3>
                     {nextEvent && (
-                        <div className="bg-[#111] rounded-[2.5rem] p-8 md:p-10 border border-white/5">
+                        <div className="bg-card rounded-[2.5rem] p-8 md:p-10 border border-border/50 shadow-xl">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                                 <div className="flex flex-col md:flex-row md:items-center gap-8">
                                     <div className="space-y-4">
-                                        <h4 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                                        <h4 className="text-3xl md:text-4xl font-bold leading-tight">
                                             {nextEvent.title}
                                         </h4>
-                                        <p className="text-xl text-white/40 font-medium">
+                                        <p className="text-xl text-muted-foreground font-medium">
                                             {nextEvent.day} {hijriMonths[nextEvent.month - 1]}
                                         </p>
                                     </div>
-                                    <div className="flex flex-col items-start md:items-center justify-center bg-white/5 px-6 py-4 rounded-[2rem] border border-white/5">
+                                    <div className="flex flex-col items-start md:items-center justify-center bg-accent/50 px-6 py-4 rounded-[2rem] border border-border/50">
                                         <p className="text-4xl font-black text-primary">{(nextEvent as any).daysRemaining}</p>
-                                        <p className="text-xs font-bold text-white/20 uppercase tracking-widest">يوم متبقي</p>
+                                        <p className="text-xs font-bold text-muted-foreground/40 uppercase tracking-widest">يوم متبقي</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <Button 
                                         onClick={() => toast.info("ميزة التذكير ستتوفر قريباً إن شاء الله")}
-                                        className="h-16 px-10 rounded-2xl bg-[#ea2e2e] hover:bg-[#ff3e3e] text-white font-bold text-xl shadow-lg shadow-[#ea2e2e]/20 transition-all active:scale-95"
+                                        className="h-16 px-10 rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 font-bold text-xl shadow-lg shadow-destructive/20 transition-all active:scale-95"
                                     >
                                         <Bell className="w-6 h-6 ml-3" />
                                         اضافة تذكير
@@ -656,9 +658,9 @@ export default function Calendar() {
                                     <Button 
                                         onClick={() => handleShareEvent(nextEvent)}
                                         variant="outline" 
-                                        className="h-16 w-16 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all active:scale-95"
+                                        className="h-16 w-16 rounded-2xl border-border/50 bg-accent/50 hover:bg-accent transition-all active:scale-95"
                                     >
-                                        <Share2 className="w-8 h-8" />
+                                        <Share2 className="w-6 h-6" />
                                     </Button>
                                 </div>
                             </div>
