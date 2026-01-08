@@ -147,6 +147,10 @@ export default function Calendar() {
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState<any>(null);
+    const [hijriAdjustment, setHijriAdjustment] = useState(() => {
+        const saved = localStorage.getItem('hijriAdjustment');
+        return saved ? parseInt(saved) : 0;
+    });
     const [showMonthlyTimes, setShowMonthlyTimes] = useState(false);
     const [monthlyData, setMonthlyData] = useState<any[]>([]);
     
@@ -162,7 +166,7 @@ export default function Calendar() {
             const dateStr = format(date, "dd-MM-yyyy");
             
             // Get Hijri info for the requested date
-            const todayData = await fetchWithFallback(`/gToH/${dateStr}`);
+            const todayData = await fetchWithFallback(`/gToH/${dateStr}?adjustment=${hijriAdjustment}`);
             
             const currentHijri = todayData.data.hijri;
             setHijriDate(currentHijri);
@@ -177,7 +181,7 @@ export default function Calendar() {
 
             // Fetch the full Hijri month calendar
             const calendarData = await fetchWithFallback(
-                `/hijriCalendarByCity/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
+                `/hijriCalendarByCity/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}&adjustment=${hijriAdjustment}`
             );
             
             setMonthDays(calendarData.data);
@@ -228,7 +232,7 @@ export default function Calendar() {
             const method = preferences?.calculation_method || 4;
 
             const calendarData = await fetchWithFallback(
-                `/hijriCalendarByCity/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
+                `/hijriCalendarByCity/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}&adjustment=${hijriAdjustment}`
             );
             
             if (calendarData.data.length > 0) {
@@ -251,7 +255,7 @@ export default function Calendar() {
 
     useEffect(() => {
         fetchMonthData(currentDate);
-    }, [currentDate]); // Only depend on currentDate, preferences handled inside fetch
+    }, [currentDate, preferences?.city, preferences?.country, preferences?.calculation_method]);
 
     const handleGtoHConvert = async () => {
         try {
@@ -396,10 +400,45 @@ export default function Calendar() {
                 <AuthReminder message="سجل دخولك لمزامنة تقويمك وتلقي تنبيهات بالمناسبات الإسلامية" />
                 
                 {/* Month Navigation - Clean & Dark */}
-                <div className="flex items-center justify-between mb-8 px-2">
-                    <Button variant="ghost" onClick={goToToday} className="text-primary hover:bg-primary/10 font-bold text-lg rounded-xl">
-                        اليوم
-                    </Button>
+                <div className="flex flex-col md:flex-row items-center justify-between mb-8 px-2 gap-4">
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" onClick={goToToday} className="text-primary hover:bg-primary/10 font-bold text-lg rounded-xl">
+                            اليوم
+                        </Button>
+                        <div className="flex items-center bg-accent/30 rounded-xl px-3 py-1 gap-2 border border-border/50">
+                            <span className="text-xs text-muted-foreground font-bold">تعديل الهجري:</span>
+                            <div className="flex items-center gap-1">
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 rounded-md hover:bg-primary/20"
+                                    onClick={() => {
+                                        const newVal = hijriAdjustment - 1;
+                                        setHijriAdjustment(newVal);
+                                        localStorage.setItem('hijriAdjustment', newVal.toString());
+                                        fetchMonthData(currentDate);
+                                    }}
+                                >
+                                    -
+                                </Button>
+                                <span className="text-sm font-mono font-bold w-4 text-center">{hijriAdjustment > 0 ? `+${hijriAdjustment}` : hijriAdjustment}</span>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 rounded-md hover:bg-primary/20"
+                                    onClick={() => {
+                                        const newVal = hijriAdjustment + 1;
+                                        setHijriAdjustment(newVal);
+                                        localStorage.setItem('hijriAdjustment', newVal.toString());
+                                        fetchMonthData(currentDate);
+                                    }}
+                                >
+                                    +
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div className="flex items-center gap-8">
                         <Button variant="ghost" size="icon" onClick={() => handleMonthChange('prev')} className="text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                             <ChevronRight className="w-8 h-8" />
@@ -411,7 +450,7 @@ export default function Calendar() {
                             <ChevronLeft className="w-8 h-8" />
                         </Button>
                     </div>
-                    <div className="w-[60px]" /> {/* Spacer for centering */}
+                    <div className="hidden md:block w-[140px]" />
                 </div>
 
                 {/* Calendar Grid - Matching the Image */}
@@ -666,6 +705,53 @@ export default function Calendar() {
                             </div>
                         </div>
                     )}
+                </div>
+                {/* Educational Cards - How to Setup Prayer Times */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                            <Info className="w-6 h-6 text-primary" />
+                        </div>
+                        <h3 className="text-2xl font-bold">دليل ضبط أوقات الصلاة</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card className="bg-card/50 border-border/50 rounded-3xl overflow-hidden hover:shadow-xl transition-all border-b-4 border-b-blue-500">
+                            <CardContent className="p-6 space-y-4">
+                                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                                    <MapPin className="w-7 h-7 text-blue-500" />
+                                </div>
+                                <h4 className="text-xl font-bold">تفعيل الموقع التلقائي</h4>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    تأكد من تفعيل الوصول للموقع في إعدادات المتصفح أو الهاتف للحصول على أدق أوقات الصلاة بناءً على إحداثياتك الحالية.
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-card/50 border-border/50 rounded-3xl overflow-hidden hover:shadow-xl transition-all border-b-4 border-b-emerald-500">
+                            <CardContent className="p-6 space-y-4">
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                                    <Search className="w-7 h-7 text-emerald-500" />
+                                </div>
+                                <h4 className="text-xl font-bold">اختيار المدينة يدوياً</h4>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    إذا كنت لا تفضل مشاركة موقعك، يمكنك اختيار الدولة والمدينة يدوياً من <span className="text-primary font-bold">صفحة الإعدادات</span> لضمان دقة المواعيد.
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-card/50 border-border/50 rounded-3xl overflow-hidden hover:shadow-xl transition-all border-b-4 border-b-amber-500">
+                            <CardContent className="p-6 space-y-4">
+                                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                                    <RefreshCw className="w-7 h-7 text-amber-500" />
+                                </div>
+                                <h4 className="text-xl font-bold">طريقة الحساب</h4>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    تأكد من اختيار طريقة الحساب المناسبة لمذهبك أو منطقتك (مثل أم القرى أو المذهب الجعفري) من الإعدادات لتجنب أي اختلاف.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </div>
