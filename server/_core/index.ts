@@ -60,6 +60,15 @@ export async function createApp() {
 
   registerOAuthRoutes(app);
 
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      gemini_key_present: !!process.env.GEMINI_API_KEY,
+      gemini_key_length: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0,
+      env: process.env.NODE_ENV
+    });
+  });
+
   app.post("/api/fatwa", async (req, res, next) => {
     console.log("[Fatwa API] Received request:", JSON.stringify(req.body));
     try {
@@ -96,15 +105,16 @@ export async function createApp() {
     console.error("[Global Error Handler] Headers:", JSON.stringify(req.headers));
     
     // If the request expects JSON or is an API call, ALWAYS return JSON
-    const isApiCall = req.path.includes("/api/") || req.originalUrl.includes("/api/");
-    const wantsJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json"));
+    const isApiCall = req.path.includes("/api/") || req.originalUrl.includes("/api/") || req.url.includes("/api/");
+    const wantsJson = req.xhr || (req.headers.accept && req.headers.accept.includes("application/json")) || (req.headers['content-type'] && req.headers['content-type'].includes("application/json"));
 
     if (isApiCall || wantsJson) {
       res.setHeader('Content-Type', 'application/json');
       return res.status(err.status || 500).json({
         error: "حدث خطأ في الخادم (API Error)",
         message: err.message || "Unknown error",
-        path: req.path
+        path: req.path,
+        url: req.originalUrl
       });
     }
     
