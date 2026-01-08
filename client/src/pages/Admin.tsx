@@ -36,7 +36,7 @@ import {
     Sparkles,
     MessageSquare,
     BookText,
-    Eye
+    Eye as EyeIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { ADHKAR_CATEGORIES } from "@shared/islamic-data";
@@ -634,7 +634,7 @@ export default function Admin() {
                                         <p className="text-sm font-medium text-purple-600 dark:text-purple-400">إجمالي الزيارات (الكل)</p>
                                         <h3 className="text-3xl font-bold mt-2">{stats.totalViews}</h3>
                                     </div>
-                                    <Eye className="w-8 h-8 text-purple-500 opacity-20" />
+                                    <EyeIcon className="w-8 h-8 text-purple-500 opacity-20" />
                                 </div>
                             </CardContent>
                         </Card>
