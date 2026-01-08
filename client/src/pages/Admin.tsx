@@ -26,6 +26,7 @@ import {
     BarChart,
     Plus,
     Trash2,
+    Pencil,
     Lock,
     Loader2,
     FileText,
@@ -63,16 +64,21 @@ export default function Admin() {
     // New Book Form State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isAddAdhkarOpen, setIsAddAdhkarOpen] = useState(false);
+    const [isEditAdhkarOpen, setIsEditAdhkarOpen] = useState(false);
+    const [isEditBookOpen, setIsEditBookOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [newAdhkar, setNewAdhkar] = useState({
         category: "morning",
         customCategory: "",
         showCustomCategory: false,
-        text: "",
+        content: "",
         source: "",
-        type: "adhkar" as "adhkar" | "duaa" | "ziyarat"
+        type: "adhkar" as "adhkar" | "duaa" | "ziyarat" | "hadith"
     });
+
+    const [editingAdhkar, setEditingAdhkar] = useState<any>(null);
+    const [editingBook, setEditingBook] = useState<any>(null);
 
     const [newBook, setNewBook] = useState({
         title: "",
@@ -80,7 +86,8 @@ export default function Admin() {
         category: "shia",
         file_url: "",
         cover_url: "",
-        description: ""
+        description: "",
+        isFeatured: 0
     });
 
     // Files state
@@ -172,7 +179,7 @@ export default function Admin() {
     const handleAddAdhkar = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!newAdhkar.text.trim()) {
+        if (!newAdhkar.content.trim()) {
             toast.error("يرجى إدخال نص الذكر");
             return;
         }
@@ -187,7 +194,7 @@ export default function Admin() {
                 .from('adhkar')
                 .select('id')
                 .eq('category', category)
-                .eq('content', newAdhkar.text.trim())
+                .eq('content', newAdhkar.content.trim())
                 .limit(1);
 
             if (existing && existing.length > 0) {
@@ -201,6 +208,7 @@ export default function Admin() {
             if (!typeValue) {
                 if (activeTab === 'duaa') typeValue = 'duaa';
                 else if (activeTab === 'ziyarat') typeValue = 'ziyarat';
+                else if (activeTab === 'hadith') typeValue = 'hadith';
                 else typeValue = 'adhkar';
             }
 
@@ -221,7 +229,7 @@ export default function Admin() {
 
             const { error } = await supabase.from('adhkar').insert([{
                 category,
-                content: newAdhkar.text,
+                content: newAdhkar.content.trim(),
                 source: newAdhkar.source,
                 type: typeValue,
                 order_index: newOrderIndex
@@ -234,7 +242,7 @@ export default function Admin() {
                 category: "morning",
                 customCategory: "",
                 showCustomCategory: false,
-                text: "",
+                content: "",
                 source: "",
                 type: "adhkar"
             });
@@ -254,6 +262,81 @@ export default function Admin() {
         else {
             toast.success("تم الحذف بنجاح");
             fetchAdhkar();
+        }
+    };
+
+    const handleUpdateAdhkar = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingAdhkar) return;
+
+        setIsSubmitting(true);
+        try {
+            const { error } = await supabase
+                .from('adhkar')
+                .update({
+                    category: editingAdhkar.category,
+                    content: editingAdhkar.content,
+                    source: editingAdhkar.source,
+                    type: editingAdhkar.type
+                })
+                .eq('id', editingAdhkar.id);
+
+            if (error) throw error;
+            toast.success("تم التحديث بنجاح");
+            setIsEditAdhkarOpen(false);
+            setEditingAdhkar(null);
+            fetchAdhkar();
+        } catch (error: any) {
+            toast.error("خطأ في التحديث: " + error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleUpdateBook = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingBook) return;
+
+        setIsSubmitting(true);
+        try {
+            let finalFileUrl = editingBook.file_url;
+            let finalCoverUrl = editingBook.cover_url;
+
+            if (pdfFile) {
+                toast.info("جاري رفع ملف الكتاب الجديد...");
+                finalFileUrl = await uploadFile(pdfFile, 'pdfs');
+            }
+
+            if (coverFile) {
+                toast.info("جاري ضغط ورفع الغلاف الجديد...");
+                const compressedCover = await compressImage(coverFile);
+                finalCoverUrl = await uploadFile(compressedCover, 'covers', coverFile.name);
+            }
+
+            const { error } = await supabase
+                .from('books')
+                .update({
+                    title: editingBook.title,
+                    author: editingBook.author,
+                    category: editingBook.category,
+                    description: editingBook.description,
+                    is_featured: editingBook.isFeatured,
+                    file_url: finalFileUrl,
+                    cover_url: finalCoverUrl
+                })
+                .eq('id', editingBook.id);
+
+            if (error) throw error;
+            toast.success("تم تحديث الكتاب بنجاح");
+            setIsEditBookOpen(false);
+            setEditingBook(null);
+            setPdfFile(null);
+            setCoverFile(null);
+            fetchBooks();
+        } catch (error: any) {
+            toast.error("خطأ في تحديث الكتاب: " + error.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -368,7 +451,11 @@ export default function Admin() {
             }
 
             const { error } = await supabase.from('books').insert([{
-                ...newBook,
+                title: newBook.title,
+                author: newBook.author,
+                category: newBook.category,
+                description: newBook.description,
+                is_featured: newBook.isFeatured,
                 file_url: finalFileUrl,
                 cover_url: finalCoverUrl
             }]);
@@ -456,6 +543,10 @@ export default function Admin() {
                         <BookText className="w-4 h-4 ml-2" />
                         الزيارات
                     </TabsTrigger>
+                    <TabsTrigger value="hadith">
+                        <MessageSquare className="w-4 h-4 ml-2" />
+                        الأحاديث
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
@@ -534,6 +625,73 @@ export default function Admin() {
                             </CardContent>
                         </Card>
                     </div>
+                    {/* Edit Adhkar Dialog */}
+                    <Dialog open={isEditAdhkarOpen} onOpenChange={setIsEditAdhkarOpen}>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle className="text-right text-2xl font-bold">تعديل المحتوى</DialogTitle>
+                            </DialogHeader>
+                            {editingAdhkar && (
+                                <form onSubmit={handleUpdateAdhkar} className="space-y-4 py-4" dir="rtl">
+                                    <div className="space-y-2">
+                                        <Label className="text-right block">الفئة</Label>
+                                        <Input
+                                            value={editingAdhkar.category}
+                                            onChange={(e) => setEditingAdhkar({ ...editingAdhkar, category: e.target.value })}
+                                            className="text-right"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-right block">المصدر</Label>
+                                        <Input
+                                            value={editingAdhkar.source}
+                                            onChange={(e) => setEditingAdhkar({ ...editingAdhkar, source: e.target.value })}
+                                            className="text-right"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-right block">النص</Label>
+                                        <textarea
+                                            className="w-full min-h-[150px] p-3 rounded-md border bg-background text-right font-arabic text-lg"
+                                            value={editingAdhkar.content}
+                                            onChange={(e) => setEditingAdhkar({ ...editingAdhkar, content: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-right block">النوع</Label>
+                                        <Select
+                                            value={editingAdhkar.type}
+                                            onValueChange={(val: any) => setEditingAdhkar({ ...editingAdhkar, type: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                 <SelectItem value="adhkar">ذكر</SelectItem>
+                                                 <SelectItem value="duaa">دعاء</SelectItem>
+                                                 <SelectItem value="ziyarat">زيارة</SelectItem>
+                                                 <SelectItem value="hadith">حديث</SelectItem>
+                                             </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <DialogFooter className="pt-4 gap-2">
+                                        <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
+                                            {isSubmitting ? (
+                                                <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                            ) : (
+                                                "حفظ التغييرات"
+                                            )}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            )}
+                        </DialogContent>
+                    </Dialog>
                 </TabsContent>
 
                 <TabsContent value="books" className="space-y-6">
@@ -632,6 +790,17 @@ export default function Admin() {
                                             </div>
                                         </div>
 
+                                        <div className="flex items-center gap-2 py-2">
+                                            <input
+                                                type="checkbox"
+                                                id="isFeatured"
+                                                checked={newBook.isFeatured === 1}
+                                                onChange={(e) => setNewBook({ ...newBook, isFeatured: e.target.checked ? 1 : 0 })}
+                                                className="w-4 h-4 text-primary"
+                                            />
+                                            <Label htmlFor="isFeatured" className="cursor-pointer">تمييز هذا الكتاب (يظهر في القسم المميز)</Label>
+                                        </div>
+
                                         <DialogFooter className="pt-4 gap-2">
                                             <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
                                                 {isSubmitting ? (
@@ -675,20 +844,141 @@ export default function Admin() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                onClick={() => handleDeleteBook(book.id)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="text-primary hover:bg-primary/10"
+                                                    onClick={() => {
+                                                        setEditingBook(book);
+                                                        setIsEditBookOpen(true);
+                                                    }}
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="text-destructive hover:bg-destructive/10"
+                                                    onClick={() => handleDeleteBook(book.id)}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     ))
                                 )}
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Edit Book Dialog */}
+                    <Dialog open={isEditBookOpen} onOpenChange={setIsEditBookOpen}>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle className="text-right text-2xl font-bold">تعديل الكتاب</DialogTitle>
+                            </DialogHeader>
+                            {editingBook && (
+                                <form onSubmit={handleUpdateBook} className="space-y-4 py-4" dir="rtl">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="edit-title" className="text-right block">عنوان الكتاب *</Label>
+                                            <Input
+                                                id="edit-title"
+                                                required
+                                                value={editingBook.title}
+                                                onChange={(e) => setEditingBook({ ...editingBook, title: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="edit-author" className="text-right block">المؤلف</Label>
+                                            <Input
+                                                id="edit-author"
+                                                value={editingBook.author}
+                                                onChange={(e) => setEditingBook({ ...editingBook, author: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-right block">التصنيف</Label>
+                                        <Select
+                                            value={editingBook.category}
+                                            onValueChange={(val: string) => setEditingBook({ ...editingBook, category: val })}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="shia">كتب الشيعة</SelectItem>
+                                                <SelectItem value="sunni">كتب أهل السنة</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-description" className="text-right block">وصف الكتاب</Label>
+                                        <textarea
+                                            id="edit-description"
+                                            className="w-full min-h-[100px] p-3 rounded-md border bg-background text-right"
+                                            value={editingBook.description || ""}
+                                            onChange={(e) => setEditingBook({ ...editingBook, description: e.target.value })}
+                                            placeholder="اكتب وصفاً مختصراً للكتاب..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4 rounded-xl border-2 border-dashed p-4 bg-muted/30">
+                                        <div className="space-y-2">
+                                            <Label className="text-right block font-bold text-primary flex items-center gap-2">
+                                                <FileText className="w-4 h-4" />
+                                                تغيير ملف الكتاب (PDF)
+                                            </Label>
+                                            <Input
+                                                type="file"
+                                                accept=".pdf"
+                                                onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                                                className="bg-background cursor-pointer"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-right block font-bold text-primary flex items-center gap-2">
+                                                <ImageIcon className="w-4 h-4" />
+                                                تغيير الغلاف (Image)
+                                            </Label>
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                                                className="bg-background cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 py-2">
+                                        <input
+                                            type="checkbox"
+                                            id="edit-isFeatured"
+                                            checked={editingBook.isFeatured === 1}
+                                            onChange={(e) => setEditingBook({ ...editingBook, isFeatured: e.target.checked ? 1 : 0 })}
+                                            className="w-4 h-4 text-primary"
+                                        />
+                                        <Label htmlFor="edit-isFeatured" className="cursor-pointer">تمييز هذا الكتاب (يظهر في القسم المميز)</Label>
+                                    </div>
+
+                                    <DialogFooter className="pt-4 gap-2">
+                                        <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
+                                            {isSubmitting ? (
+                                                <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                            ) : (
+                                                "حفظ التغييرات"
+                                            )}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            )}
+                        </DialogContent>
+                    </Dialog>
                 </TabsContent>
 
                 <TabsContent value="adhkar">
@@ -758,8 +1048,8 @@ export default function Admin() {
                                             <Label>نص الذكر</Label>
                                             <textarea
                                                 className="w-full min-h-[100px] p-3 rounded-md border bg-background text-right"
-                                                value={newAdhkar.text}
-                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, text: e.target.value })}
+                                                value={newAdhkar.content}
+                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, content: e.target.value })}
                                                 placeholder="..."
                                                 required
                                             />
@@ -799,16 +1089,32 @@ export default function Admin() {
                                                         </span>
                                                         <p className="text-sm font-bold text-muted-foreground"> المصدر: {item.source}</p>
                                                     </div>
-                                                    <p className="text-base leading-relaxed">{item.text}</p>
+                                                    <p className="text-base leading-relaxed">{item.content}</p>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => handleDeleteAdhkar(item.id)}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-primary hover:bg-primary/10"
+                                                        onClick={() => {
+                                                            setEditingAdhkar({
+                                                                ...item,
+                                                                content: item.content
+                                                            });
+                                                            setIsEditAdhkarOpen(true);
+                                                        }}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDeleteAdhkar(item.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))
@@ -886,8 +1192,8 @@ export default function Admin() {
                                             <Label>نص الدعاء</Label>
                                             <textarea
                                                 className="w-full min-h-[100px] p-3 rounded-md border bg-background text-right"
-                                                value={newAdhkar.text}
-                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, text: e.target.value })}
+                                                value={newAdhkar.content}
+                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, content: e.target.value })}
                                                 placeholder="..."
                                                 required
                                             />
@@ -927,16 +1233,32 @@ export default function Admin() {
                                                         </span>
                                                         <p className="text-sm font-bold text-muted-foreground"> المصدر: {item.source}</p>
                                                     </div>
-                                                    <p className="text-base leading-relaxed">{item.text}</p>
+                                                    <p className="text-base leading-relaxed">{item.content}</p>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => handleDeleteAdhkar(item.id)}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-primary hover:bg-primary/10"
+                                                        onClick={() => {
+                                                            setEditingAdhkar({
+                                                                ...item,
+                                                                content: item.content
+                                                            });
+                                                            setIsEditAdhkarOpen(true);
+                                                        }}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDeleteAdhkar(item.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))
@@ -1019,8 +1341,8 @@ export default function Admin() {
                                             <Label>نص الزيارة</Label>
                                             <textarea
                                                 className="w-full min-h-[150px] p-3 rounded-md border bg-background text-right font-arabic text-lg"
-                                                value={newAdhkar.text}
-                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, text: e.target.value })}
+                                                value={newAdhkar.content}
+                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, content: e.target.value })}
                                                 placeholder="..."
                                                 required
                                             />
@@ -1060,16 +1382,175 @@ export default function Admin() {
                                                         </span>
                                                         <p className="text-sm font-bold text-muted-foreground"> المصدر: {item.source}</p>
                                                     </div>
-                                                    <p className="text-base leading-relaxed font-arabic text-xl">{(item.text || '').substring(0, 150)}...</p>
+                                                    <p className="text-base leading-relaxed font-arabic text-xl">{(item.content || '').substring(0, 150)}...</p>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => handleDeleteAdhkar(item.id)}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-primary hover:bg-primary/10"
+                                                        onClick={() => {
+                                                            setEditingAdhkar({
+                                                                ...item,
+                                                                content: item.content
+                                                            });
+                                                            setIsEditAdhkarOpen(true);
+                                                        }}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDeleteAdhkar(item.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="hadith">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle>إدارة الأحاديث</CardTitle>
+                                <p className="text-sm text-muted-foreground mt-1">إضافة وتعديل وحذف الأحاديث الشريفة</p>
+                            </div>
+                            <Dialog open={isAddAdhkarOpen} onOpenChange={setIsAddAdhkarOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="gap-2">
+                                        <Plus className="w-4 h-4" />
+                                        إضافة حديث جديد
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[500px]">
+                                    <DialogHeader>
+                                        <DialogTitle>إضافة حديث جديد</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleAddAdhkar} className="space-y-4 pt-4 text-right">
+                                        <div className="space-y-2">
+                                            <Label>الفئة</Label>
+                                            <Select
+                                                value={newAdhkar.showCustomCategory ? "custom" : newAdhkar.category}
+                                                onValueChange={(v: string) => {
+                                                    if (v === "custom") {
+                                                        setNewAdhkar({ ...newAdhkar, showCustomCategory: true, category: "" });
+                                                    } else {
+                                                        setNewAdhkar({ ...newAdhkar, showCustomCategory: false, category: v });
+                                                    }
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="اختر الفئة" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {Object.entries(ADHKAR_CATEGORIES)
+                                                        .filter(([_, cat]) => (cat as any).type === activeTab)
+                                                        .map(([key, cat]) => (
+                                                            <SelectItem key={key} value={key}>{cat.name}</SelectItem>
+                                                        ))}
+                                                    {/* Existing custom categories for hadith */}
+                                                    {Array.from(new Set(adhkarList.filter(a => a.type === 'hadith').map(a => a.category)))
+                                                        .filter(cat => !ADHKAR_CATEGORIES[cat as keyof typeof ADHKAR_CATEGORIES])
+                                                        .map(cat => (
+                                                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                                        ))
+                                                    }
+                                                    <SelectItem value="custom" className="font-bold text-primary">+ فئة جديدة...</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {newAdhkar.showCustomCategory && (
+                                            <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+                                                <Label>اسم الفئة الجديدة</Label>
+                                                <Input
+                                                    placeholder="مثلاً: أحاديث أهل البيت"
+                                                    value={newAdhkar.customCategory}
+                                                    onChange={(e) => setNewAdhkar({ ...newAdhkar, customCategory: e.target.value })}
+                                                    className="text-right"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            <Label>نص الحديث</Label>
+                                            <textarea
+                                                className="w-full min-h-[150px] p-3 rounded-md border bg-background text-right font-arabic text-lg"
+                                                value={newAdhkar.content}
+                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, content: e.target.value })}
+                                                placeholder="..."
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>المصدر</Label>
+                                            <Input
+                                                value={newAdhkar.source}
+                                                onChange={(e) => setNewAdhkar({ ...newAdhkar, source: e.target.value })}
+                                                placeholder="مثلاً: الكافي، بحار الأنوار"
+                                                required
+                                            />
+                                        </div>
+                                        <DialogFooter className="pt-4">
+                                            <Button type="submit" disabled={isSubmitting} className="w-full">
+                                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "إضافة الحديث"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {adhkarList.filter(i => i.type === 'hadith').length === 0 ? (
+                                    <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+                                        <p>لا توجد أحاديث مضافة حالياً</p>
+                                    </div>
+                                ) : (
+                                    adhkarList.filter(i => i.type === 'hadith').map((item) => (
+                                        <div key={item.id} className="flex flex-col p-4 bg-muted/50 rounded-lg group">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1 text-right">
+                                                    <div className="flex items-center gap-2 mb-2 justify-end">
+                                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                                                            {getCategoryName(item.category)}
+                                                        </span>
+                                                        <p className="text-sm font-bold text-muted-foreground"> المصدر: {item.source}</p>
+                                                    </div>
+                                                    <p className="text-base leading-relaxed font-arabic text-xl">{item.content}</p>
+                                                </div>
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-primary hover:bg-primary/10"
+                                                        onClick={() => {
+                                                            setEditingAdhkar({
+                                                                ...item,
+                                                                content: item.content
+                                                            });
+                                                            setIsEditAdhkarOpen(true);
+                                                        }}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDeleteAdhkar(item.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))
