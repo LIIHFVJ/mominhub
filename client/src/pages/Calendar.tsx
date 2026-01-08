@@ -260,340 +260,263 @@ export default function Calendar() {
     ];
 
     return (
-        <div className="min-h-screen bg-background text-foreground p-4 font-arabic" dir="rtl">
-            <div className="max-w-4xl mx-auto pt-4">
-                <AuthReminder message="سجل دخولك لمزامنة تقويمك وتلقي تنبيهات بالمناسبات الإسلامية" />
-            </div>
-            <div className="max-w-4xl mx-auto space-y-6 pb-24">
+        <div className="min-h-screen bg-background text-foreground font-arabic" dir="rtl">
+            {/* Header with Background Image Style */}
+            <div className="relative h-64 md:h-80 overflow-hidden">
+                <div 
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ 
+                        backgroundImage: `url('https://images.unsplash.com/photo-1591604021695-4c6977efec5d?auto=format&fit=crop&q=80&w=2000')`,
+                        filter: 'brightness(0.4)'
+                    }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
                 
-                {/* Header - Modern & Clear */}
-                <div className="relative overflow-hidden rounded-3xl bg-primary/10 border border-primary/20 p-8 shadow-sm">
-                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="space-y-2">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold mb-2">
-                                <CalendarIcon className="w-3.5 h-3.5" />
-                                اليوم في التقويم الهجري
-                            </div>
-                            <h1 className="text-3xl md:text-5xl font-bold text-primary">
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 pt-8">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={hijriDate?.day}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="space-y-2"
+                        >
+                            <h1 className="text-4xl md:text-6xl font-bold text-white mb-2">
                                 {hijriDate ? (
-                                    <>
-                                        <span className="text-muted-foreground text-xl md:text-2xl block mb-1">
-                                            {hijriDate.weekday.ar}، {hijriDate.day}
-                                        </span>
-                                        {hijriDate.month.ar} {hijriDate.year} هـ
-                                    </>
+                                    `${hijriDate.day} ${hijriDate.month.ar} ${hijriDate.year} هـ`
                                 ) : "جاري التحميل..."}
                             </h1>
-                            <p className="text-muted-foreground font-medium">
-                                {format(new Date(), "EEEE d MMMM yyyy", { locale: ar })}
+                            <p className="text-lg md:text-xl text-white/80 font-medium">
+                                {format(currentDate, "EEEE d MMMM yyyy", { locale: ar })}
                             </p>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-3">
-                            <Button variant="outline" size="sm" onClick={goToToday} className="rounded-xl border-primary/20 hover:bg-primary/5">
-                                <RefreshCw className="w-4 h-4 ml-2" />
-                                اليوم
-                            </Button>
-                            <Button variant="outline" size="sm" className="rounded-xl border-primary/20 hover:bg-primary/5">
-                                <Share2 className="w-4 h-4 ml-2" />
-                                مشاركة
-                            </Button>
-                        </div>
-                    </div>
-                    {/* Background Decorative Pattern */}
-                    <div className="absolute -left-12 -top-12 w-48 h-48 bg-primary/5 rounded-full blur-3xl" />
-                    <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Main Calendar Section */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <Card className="rounded-3xl border-border/40 shadow-sm overflow-hidden">
-                            <div className="flex items-center justify-between p-4 bg-muted/10 border-b">
-                                <div className="flex items-center bg-muted p-1 rounded-xl">
-                                    <Button 
-                                        variant={!showMonthlyTimes ? "secondary" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setShowMonthlyTimes(false)}
-                                        className="rounded-lg text-xs"
-                                    >
-                                        التقويم
-                                    </Button>
-                                    <Button 
-                                        variant={showMonthlyTimes ? "secondary" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setShowMonthlyTimes(true)}
-                                        className="rounded-lg text-xs"
-                                    >
-                                        مواقيت الشهر
-                                    </Button>
-                                </div>
+            <div className="max-w-4xl mx-auto px-4 -mt-10 relative z-20 space-y-8 pb-24">
+                <AuthReminder message="سجل دخولك لمزامنة تقويمك وتلقي تنبيهات بالمناسبات الإسلامية" />
+
+                {/* Calendar Card */}
+                <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-card/80 backdrop-blur-xl">
+                    <CardContent className="p-0">
+                        {/* Month Navigation */}
+                        <div className="flex items-center justify-between p-6 border-b border-border/10">
+                            <Button variant="ghost" size="icon" onClick={() => handleMonthChange('prev')} className="rounded-full hover:bg-primary/10">
+                                <ChevronRight className="w-6 h-6" />
+                            </Button>
+                            <h2 className="text-2xl font-bold text-primary">
+                                {hijriDate?.month.ar}
+                            </h2>
+                            <Button variant="ghost" size="icon" onClick={() => handleMonthChange('next')} className="rounded-full hover:bg-primary/10">
+                                <ChevronLeft className="w-6 h-6" />
+                            </Button>
+                        </div>
+
+                        <div className="p-6 md:p-8">
+                            <div className="grid grid-cols-7 mb-6">
+                                {weekdays.map(day => (
+                                    <div key={day.en} className="text-center text-sm font-bold text-muted-foreground/60">
+                                        {day.ar}
+                                    </div>
+                                ))}
                             </div>
-                            <CardContent className="p-0">
-                                {/* Calendar Month Header */}
-                                <div className="flex items-center justify-between p-6 bg-muted/30 border-b">
-                                    <Button variant="ghost" size="icon" onClick={() => handleMonthChange('prev')} className="rounded-full">
-                                        <ChevronRight className="w-5 h-5" />
-                                    </Button>
-                                    <h2 className="text-xl font-bold text-primary flex items-center gap-2">
-                                        {hijriDate?.month.ar} {hijriDate?.year} هـ
-                                    </h2>
-                                    <Button variant="ghost" size="icon" onClick={() => handleMonthChange('next')} className="rounded-full">
-                                        <ChevronLeft className="w-5 h-5" />
-                                    </Button>
-                                </div>
 
-                                {/* Calendar Grid */}
-                                <div className="p-6">
-                                    {showMonthlyTimes ? (
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-sm text-right">
-                                                <thead>
-                                                    <tr className="border-b border-border/40 text-muted-foreground">
-                                                        <th className="p-2 font-bold text-xs">اليوم</th>
-                                                        <th className="p-2 font-bold text-xs">ميلادي</th>
-                                                        <th className="p-2 font-bold text-xs">هجري</th>
-                                                        <th className="p-2 font-bold text-xs">الفجر</th>
-                                                        <th className="p-2 font-bold text-xs">الظهر</th>
-                                                        <th className="p-2 font-bold text-xs">العصر</th>
-                                                        <th className="p-2 font-bold text-xs">المغرب</th>
-                                                        <th className="p-2 font-bold text-xs">العشاء</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {monthlyData.map((day: any, i: number) => {
-                                                        const isToday = hijriDate && 
-                                                                       day.hijri.day === hijriDate.day && 
-                                                                       day.hijri.month.number === hijriDate.month.number;
-                                                        return (
-                                                            <tr key={i} className={`border-b border-border/10 hover:bg-primary/5 transition-colors ${isToday ? 'bg-primary/10' : ''}`}>
-                                                                <td className="p-2 font-medium text-xs">{day.hijri.weekday.ar}</td>
-                                                                <td className="p-2 text-[10px]">{day.gregorian.day}/{day.gregorian.month.number}</td>
-                                                                <td className="p-2 text-[10px]">{day.hijri.day}</td>
-                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Fajr.split(' ')[0]}</td>
-                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Dhuhr.split(' ')[0]}</td>
-                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Asr.split(' ')[0]}</td>
-                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Maghrib.split(' ')[0]}</td>
-                                                                <td className="p-2 font-bold text-primary text-xs">{day.timings.Isha.split(' ')[0]}</td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="grid grid-cols-7 mb-4">
-                                                {weekdays.map(day => (
-                                                    <div key={day.en} className="text-center text-[10px] md:text-xs font-bold text-muted-foreground pb-2">
-                                                        {day.ar}
+                            <div className="grid grid-cols-7 gap-2 md:gap-4">
+                                {loading ? (
+                                    Array.from({ length: 35 }).map((_, i) => (
+                                        <div key={`skeleton-${i}`} className="aspect-square bg-muted/20 animate-pulse rounded-full" />
+                                    ))
+                                ) : (
+                                    <>
+                                        {monthDays.length > 0 && Array.from({ length: weekdays.findIndex(d => d.ar === monthDays[0].weekday.ar) }).map((_, i) => (
+                                            <div key={`pad-${i}`} className="aspect-square" />
+                                        ))}
+                                        
+                                        {monthDays.map((day, idx) => {
+                                            const isToday = hijriDate && 
+                                                           day.hijri.day === hijriDate.day && 
+                                                           day.hijri.month.number === hijriDate.month.number;
+                                            
+                                            const isSelected = selectedDay && 
+                                                              day.hijri.day === selectedDay.hijri.day && 
+                                                              day.hijri.month.number === selectedDay.hijri.month.number;
+
+                                            const event = ISLAMIC_EVENTS.find(e => 
+                                                e.month === day.hijri.month.number && e.day === parseInt(day.hijri.day)
+                                            );
+
+                                            return (
+                                                <button 
+                                                    key={idx} 
+                                                    onClick={() => setSelectedDay(day)}
+                                                    className={`
+                                                        relative aspect-square flex items-center justify-center rounded-full transition-all text-xl font-bold
+                                                        ${isToday ? "bg-red-600 text-white shadow-lg shadow-red-600/30 scale-110 z-10" : ""}
+                                                        ${isSelected && !isToday ? "bg-primary/20 text-primary border-2 border-primary" : ""}
+                                                        ${!isToday && !isSelected ? "hover:bg-primary/10 text-foreground" : ""}
+                                                        ${event && !isToday ? "after:content-[''] after:absolute after:bottom-1 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full" : ""}
+                                                    `}
+                                                >
+                                                    {parseInt(day.hijri.day)}
+                                                </button>
+                                            );
+                                        })}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Selected Day Details / Prayer Times */}
+                        <AnimatePresence mode="wait">
+                            {selectedDay && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="bg-primary/5 border-t border-border/10 p-6"
+                                >
+                                    <div className="flex flex-col md:flex-row justify-between gap-6">
+                                        <div className="space-y-4 flex-1">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-xl font-bold flex items-center gap-2">
+                                                    <Clock className="w-5 h-5 text-primary" />
+                                                    توقيت صلاة {selectedDay.hijri.day} {selectedDay.hijri.month.ar}
+                                                </h3>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={() => setShowMonthlyTimes(!showMonthlyTimes)}
+                                                    className="text-xs text-primary"
+                                                >
+                                                    {showMonthlyTimes ? "إخفاء جدول الشهر" : "عرض جدول الشهر"}
+                                                </Button>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                                {Object.entries(selectedDay.timings).filter(([name]) => ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(name)).map(([name, time]) => (
+                                                    <div key={name} className="bg-background/50 p-3 rounded-2xl border border-border/10 flex flex-col items-center">
+                                                        <span className="text-[10px] text-muted-foreground mb-1">
+                                                            {name === "Fajr" ? "الفجر" : name === "Dhuhr" ? "الظهر" : name === "Asr" ? "العصر" : name === "Maghrib" ? "المغرب" : "العشاء"}
+                                                        </span>
+                                                        <span className="text-lg font-bold text-primary">{time.split(' ')[0]}</span>
                                                     </div>
                                                 ))}
                                             </div>
-
-                                            <div className="grid grid-cols-7 gap-1 md:gap-2">
-                                        {loading ? (
-                                            Array.from({ length: 35 }).map((_, i) => (
-                                                <div key={`skeleton-${i}`} className="aspect-square bg-muted/20 animate-pulse rounded-2xl" />
-                                            ))
-                                        ) : (
-                                            <>
-                                                {monthDays.length > 0 && Array.from({ length: weekdays.findIndex(d => d.ar === monthDays[0].weekday.ar) }).map((_, i) => (
-                                                    <div key={`pad-${i}`} className="aspect-square bg-muted/5 rounded-2xl" />
-                                                ))}
-                                                
-                                                {monthDays.map((day, idx) => {
-                                                    const isToday = hijriDate && 
-                                                                   day.hijri.day === hijriDate.day && 
-                                                                   day.hijri.month.number === hijriDate.month.number;
-                                                    
-                                                    const isSelected = selectedDay && 
-                                                                      day.hijri.day === selectedDay.hijri.day && 
-                                                                      day.hijri.month.number === selectedDay.hijri.month.number;
-
-                                                    const event = ISLAMIC_EVENTS.find(e => 
-                                                        e.month === day.hijri.month.number && e.day === parseInt(day.hijri.day)
-                                                    );
-
-                                                    return (
-                                                        <button 
-                                                            key={idx} 
-                                                            onClick={() => setSelectedDay(day)}
-                                                            className={`
-                                                                relative aspect-square flex flex-col items-center justify-between p-1.5 md:p-2 rounded-2xl transition-all border
-                                                                ${isToday ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 z-10 border-primary" : ""}
-                                                                ${isSelected && !isToday ? "bg-primary/10 border-primary shadow-sm" : ""}
-                                                                ${!isToday && !isSelected ? "hover:bg-muted/50 border-transparent" : ""}
-                                                                ${event && !isToday && !isSelected ? "bg-primary/5 border-primary/10" : ""}
-                                                            `}
-                                                        >
-                                                            <div className="w-full flex justify-between items-start">
-                                                                <span className={`text-base md:text-xl font-bold leading-none ${isToday ? "" : "text-foreground"}`}>
-                                                                    {parseInt(day.hijri.day)}
-                                                                </span>
-                                                                {event && (
-                                                                    <div className={`w-1.5 h-1.5 rounded-full ${isToday ? "bg-white" : "bg-primary"}`} />
-                                                                )}
-                                                            </div>
-
-                                                            <div className="w-full flex flex-col items-center gap-0.5">
-                                                                <div className="flex items-center gap-1">
-                                                                    <span className={`text-[9px] md:text-xs font-bold ${isToday ? "text-primary-foreground/90" : "text-muted-foreground"}`}>
-                                                                        {day.gregorian.day}
-                                                                    </span>
-                                                                    <span className={`text-[8px] md:text-[10px] opacity-60 ${isToday ? "text-primary-foreground/70" : "text-muted-foreground/60"}`}>
-                                                                        {day.gregorian.month.en.substring(0, 3)}
-                                                                    </span>
-                                                                </div>
-                                                                
-                                                                {/* Optional: Small prayer time indicator (Fajr or Maghrib) */}
-                                                                {!loading && day.timings && (
-                                                                    <div className={`text-[7px] md:text-[8px] font-bold opacity-60 ${isToday ? "text-white" : "text-primary"}`}>
-                                                                        {day.timings.Fajr}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            
-                                                            {/* Tooltip on hover */}
-                                                            {event && (
-                                                                <div className="absolute bottom-full mb-2 hidden group-hover:block z-20 w-32 p-2 bg-popover text-popover-foreground text-[10px] rounded-lg shadow-xl border border-border">
-                                                                    {event.title}
-                                                                </div>
-                                                            )}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </>
-                                        )}
+                                        </div>
                                     </div>
-                                </>
+
+                                    {showMonthlyTimes && (
+                                        <div className="mt-8 overflow-x-auto">
+                                            <table className="w-full text-sm text-right">
+                                                <thead>
+                                                    <tr className="border-b border-border/10 text-muted-foreground">
+                                                        <th className="p-2 font-bold text-xs">اليوم</th>
+                                                        <th className="p-2 font-bold text-xs">هجري</th>
+                                                        <th className="p-2 font-bold text-xs">ميلادي</th>
+                                                        <th className="p-2 font-bold text-xs">الفجر</th>
+                                                        <th className="p-2 font-bold text-xs">المغرب</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {monthlyData.map((day: any, i: number) => (
+                                                        <tr key={i} className="border-b border-border/5 hover:bg-primary/5">
+                                                            <td className="p-2 text-xs">{day.hijri.weekday.ar}</td>
+                                                            <td className="p-2 font-bold text-xs">{day.hijri.day}</td>
+                                                            <td className="p-2 text-[10px] text-muted-foreground">{day.gregorian.day}/{day.gregorian.month.number}</td>
+                                                            <td className="p-2 font-bold text-primary text-xs">{day.timings.Fajr.split(' ')[0]}</td>
+                                                            <td className="p-2 font-bold text-primary text-xs">{day.timings.Maghrib.split(' ')[0]}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </motion.div>
                             )}
-                        </div>
+                        </AnimatePresence>
                     </CardContent>
                 </Card>
 
-                        {/* Events List for this Month */}
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-bold flex items-center gap-2 px-2">
-                                <Info className="w-5 h-5 text-primary" />
-                                مناسبات هذا الشهر الهجري
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {hijriDate && ISLAMIC_EVENTS.filter(e => e.month === hijriDate.month.number).map((event, i) => (
-                                    <Card key={i} className="rounded-2xl border-border/40 hover:border-primary/30 transition-colors bg-card/50">
-                                        <CardContent className="p-4 flex items-start gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center text-primary flex-shrink-0">
-                                                <span className="text-lg font-bold leading-none">{event.day}</span>
-                                                <span className="text-[10px] font-bold">{hijriDate.month.ar}</span>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <h4 className="font-bold text-sm text-primary">{event.title}</h4>
-                                                <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                                {hijriDate && ISLAMIC_EVENTS.filter(e => e.month === hijriDate.month.number).length === 0 && (
-                                    <p className="col-span-full text-center text-muted-foreground py-8 italic">
-                                        لا توجد مناسبات مسجلة في هذا الشهر
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Sidebar Section */}
-                    <div className="space-y-6">
-                        {/* Prayer Times Card */}
-                        <Card className="rounded-3xl border-border/40 shadow-sm bg-gradient-to-br from-primary/5 to-secondary/5 overflow-hidden">
-                            <CardContent className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-bold flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-primary" />
-                                        مواقيت الصلاة {selectedDay ? (
-                                            parseInt(selectedDay.hijri.day) === parseInt(hijriDate?.day || "") ? "اليوم" : `يوم ${selectedDay.hijri.day}`
-                                        ) : "اليوم"}
-                                    </h3>
-                                    <span className="text-[10px] text-muted-foreground">
-                                        {selectedDay ? selectedDay.hijri.weekday.ar : hijriDate?.weekday.ar}
-                                    </span>
+                {/* Date Conversion Section */}
+                <div className="space-y-4">
+                    <h3 className="text-2xl font-bold px-2">تحويل التاريخ</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="rounded-[2rem] border-none shadow-lg bg-card/50 backdrop-blur-md overflow-hidden hover:bg-card/80 transition-all cursor-pointer group" onClick={() => setConversionType('HtoG')}>
+                            <CardContent className="p-6 flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <h4 className="text-xl font-bold">تحويل التاريخ الهجري</h4>
+                                    <p className="text-sm text-muted-foreground">التاريخ الهجري إلى الميلادي</p>
                                 </div>
-                                {loading ? (
-                                    <div className="space-y-3">
-                                        {[1,2,3,4,5].map(i => <div key={i} className="h-8 bg-muted animate-pulse rounded-lg" />)}
-                                    </div>
-                                ) : (selectedDay?.timings || prayerTimes) ? (
-                                    <div className="space-y-3">
-                                        {Object.entries(selectedDay?.timings || prayerTimes).filter(([name]) => ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(name)).map(([name, time]) => (
-                                            <div key={name} className="flex items-center justify-between p-2 rounded-xl hover:bg-white/50 transition-colors">
-                                                <span className="text-sm font-medium">
-                                                    {name === "Fajr" ? "الفجر" : name === "Dhuhr" ? "الظهر" : name === "Asr" ? "العصر" : name === "Maghrib" ? "المغرب" : "العشاء"}
-                                                </span>
-                                                <span className="text-sm font-bold text-primary">{time}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-4 text-xs text-muted-foreground">
-                                        جاري تحميل المواقيت...
-                                    </div>
-                                )}
+                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                                    <CalendarIcon className="w-8 h-8" />
+                                </div>
                             </CardContent>
                         </Card>
 
-                        {/* Conversion Tool */}
-                        <Card className="rounded-3xl border-border/40 shadow-sm">
-                            <CardContent className="p-6">
-                                <h3 className="font-bold flex items-center gap-2 mb-4">
-                                    <RefreshCw className="w-4 h-4 text-primary" />
-                                    تحويل التاريخ
-                                </h3>
-                                
-                                <div className="flex bg-muted p-1 rounded-xl mb-4">
-                                    <button 
-                                        onClick={() => setConversionType('GtoH')}
-                                        className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${conversionType === 'GtoH' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground'}`}
-                                    >
-                                        ميلادي ← هجري
-                                    </button>
-                                    <button 
-                                        onClick={() => setConversionType('HtoG')}
-                                        className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${conversionType === 'HtoG' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground'}`}
-                                    >
-                                        هجري ← ميلادي
-                                    </button>
-                                </div>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Card className="rounded-[2rem] border-none shadow-lg bg-card/50 backdrop-blur-md overflow-hidden hover:bg-card/80 transition-all cursor-pointer group">
+                                    <CardContent className="p-6 flex items-center justify-between">
+                                        <div className="space-y-1">
+                                            <h4 className="text-xl font-bold">تحويل التاريخ الميلادي</h4>
+                                            <p className="text-sm text-muted-foreground">التاريخ الميلادي إلى الهجري</p>
+                                        </div>
+                                        <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-all">
+                                            <CalendarIcon className="w-8 h-8" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md rounded-[2rem] font-arabic">
+                                <DialogHeader>
+                                    <DialogTitle className="text-2xl font-bold text-center">تحويل التاريخ</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-6 py-4">
+                                    <div className="flex bg-muted p-1 rounded-2xl">
+                                        <button 
+                                            onClick={() => setConversionType('GtoH')}
+                                            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${conversionType === 'GtoH' ? 'bg-background text-primary shadow-md' : 'text-muted-foreground'}`}
+                                        >
+                                            ميلادي ← هجري
+                                        </button>
+                                        <button 
+                                            onClick={() => setConversionType('HtoG')}
+                                            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${conversionType === 'HtoG' ? 'bg-background text-primary shadow-md' : 'text-muted-foreground'}`}
+                                        >
+                                            هجري ← ميلادي
+                                        </button>
+                                    </div>
 
-                                <div className="space-y-4">
                                     {conversionType === 'GtoH' ? (
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
                                             <Input 
                                                 type="date" 
                                                 value={convertGtoH}
                                                 onChange={(e) => setConvertGtoH(e.target.value)}
-                                                className="rounded-xl border-border/40 text-right"
+                                                className="h-14 rounded-2xl border-border/40 text-right text-lg"
                                             />
-                                            <Button onClick={handleGtoHConvert} className="w-full rounded-xl">تحويل</Button>
+                                            <Button onClick={handleGtoHConvert} className="w-full h-14 rounded-2xl text-lg font-bold">تحويل الآن</Button>
                                         </div>
                                     ) : (
-                                        <div className="space-y-3">
-                                            <div className="grid grid-cols-3 gap-2">
-                                                <Input placeholder="سنة" value={convertHtoG.year} onChange={e => setConvertHtoG(prev => ({ ...prev, year: e.target.value }))} className="text-center text-xs px-1" />
-                                                <Input placeholder="شهر" value={convertHtoG.month} onChange={e => setConvertHtoG(prev => ({ ...prev, month: e.target.value }))} className="text-center text-xs px-1" />
-                                                <Input placeholder="يوم" value={convertHtoG.day} onChange={e => setConvertHtoG(prev => ({ ...prev, day: e.target.value }))} className="text-center text-xs px-1" />
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <Input placeholder="اليوم" value={convertHtoG.day} onChange={e => setConvertHtoG(prev => ({ ...prev, day: e.target.value }))} className="h-14 rounded-2xl text-center text-lg" />
+                                                <Input placeholder="الشهر" value={convertHtoG.month} onChange={e => setConvertHtoG(prev => ({ ...prev, month: e.target.value }))} className="h-14 rounded-2xl text-center text-lg" />
+                                                <Input placeholder="السنة" value={convertHtoG.year} onChange={e => setConvertHtoG(prev => ({ ...prev, year: e.target.value }))} className="h-14 rounded-2xl text-center text-lg" />
                                             </div>
-                                            <Button onClick={handleHtoGConvert} className="w-full rounded-xl">تحويل</Button>
+                                            <Button onClick={handleHtoGConvert} className="w-full h-14 rounded-2xl text-lg font-bold">تحويل الآن</Button>
                                         </div>
                                     )}
 
                                     {convertedResult && (
                                         <motion.div 
-                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="p-4 rounded-2xl bg-primary/10 border border-primary/20 text-center"
+                                            className="p-8 rounded-[2rem] bg-primary/10 border-2 border-primary/20 text-center space-y-2"
                                         >
-                                            <p className="text-[10px] text-primary font-bold mb-1 uppercase tracking-wider">النتيجة</p>
-                                            <p className="text-base font-bold text-primary">
+                                            <p className="text-sm text-primary font-bold uppercase tracking-widest">التاريخ المحول</p>
+                                            <p className="text-2xl font-bold text-primary">
                                                 {convertedResult.type === 'hijri' ? (
                                                     `${convertedResult.data.day} ${convertedResult.data.month.ar} ${convertedResult.data.year} هـ`
                                                 ) : (
@@ -603,33 +526,47 @@ export default function Calendar() {
                                         </motion.div>
                                     )}
                                 </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                </div>
+
+                {/* Upcoming Event Section */}
+                <div className="space-y-4">
+                    <h3 className="text-2xl font-bold px-2">الحدث القادم</h3>
+                    {nextEvent && (
+                        <Card className="rounded-[2.5rem] border-none shadow-xl bg-gradient-to-br from-card to-card/50 overflow-hidden group">
+                            <CardContent className="p-8">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                                    <div className="space-y-4 flex-1">
+                                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold">
+                                            <Bell className="w-4 h-4" />
+                                            حدث إسلامي قريب
+                                        </div>
+                                        <h4 className="text-3xl md:text-4xl font-bold leading-tight">
+                                            {nextEvent.title}
+                                        </h4>
+                                        <div className="flex items-center gap-4 text-muted-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <CalendarIcon className="w-5 h-5" />
+                                                <span className="text-lg font-medium">{nextEvent.day} {hijriMonths[nextEvent.month - 1]}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <Button className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-lg shadow-lg shadow-red-600/20 transition-all active:scale-95">
+                                            <Bell className="w-5 h-5 ml-2" />
+                                            إضافة تذكير
+                                        </Button>
+                                        <Button variant="outline" className="h-14 w-14 rounded-2xl border-border/40 hover:bg-primary/5 transition-all active:scale-95">
+                                            <Share2 className="w-6 h-6" />
+                                        </Button>
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
-
-                        {/* Quick Links */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <a href="/qibla" className="block">
-                                <Card className="rounded-2xl border-border/40 hover:border-primary/30 transition-colors h-full bg-card/50">
-                                    <CardContent className="p-4 flex flex-col items-center gap-2 text-center">
-                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                            <MapPin className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-xs font-bold">اتجاه القبلة</span>
-                                    </CardContent>
-                                </Card>
-                            </a>
-                            <a href="/adhkar" className="block">
-                                <Card className="rounded-2xl border-border/40 hover:border-primary/30 transition-colors h-full bg-card/50">
-                                    <CardContent className="p-4 flex flex-col items-center gap-2 text-center">
-                                        <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-                                            <RefreshCw className="w-5 h-5" />
-                                        </div>
-                                        <span className="text-xs font-bold">أذكار اليوم</span>
-                                    </CardContent>
-                                </Card>
-                            </a>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
