@@ -466,9 +466,11 @@ export default function Calendar() {
                                             </>
                                         )}
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
 
                         {/* Events List for this Month */}
                         <div className="space-y-4">
