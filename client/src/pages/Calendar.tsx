@@ -34,24 +34,46 @@ const ISLAMIC_EVENTS: HijriEvent[] = [
     { month: 1, day: 1, title: "رأس السنة الهجرية", description: "بداية العام الهجري الجديد", type: 'holy' },
     { month: 1, day: 10, title: "يوم عاشوراء", description: "ذكرى استشهاد الإمام الحسين عليه السلام", type: 'death' },
     { month: 2, day: 20, title: "أربعينية الإمام الحسين", description: "مرور 40 يوماً على واقعة الطف", type: 'death' },
+    { month: 2, day: 28, title: "وفاة الرسول الأكرم (ص)", description: "ذكرى رحيل نبي الرحمة محمد صلى الله عليه وآله", type: 'death' },
+    { month: 3, day: 8, title: "استشهاد الإمام العسكري (ع)", description: "ذكرى استشهاد الإمام الحسن العسكري", type: 'death' },
     { month: 3, day: 12, title: "المولد النبوي الشريف", description: "على رواية المشهور عند السنة", type: 'birth' },
     { month: 3, day: 17, title: "المولد النبوي ومولد الإمام الصادق", description: "على رواية الشيعة الإمامية", type: 'birth' },
+    { month: 4, day: 8, title: "مولد الإمام العسكري (ع)", description: "ذكرى مولد الإمام الحسن العسكري", type: 'birth' },
+    { month: 5, day: 5, title: "مولد السيدة زينب (ع)", description: "ذكرى مولد بطلة كربلاء", type: 'birth' },
+    { month: 5, day: 13, title: "استشهاد السيدة فاطمة (ع)", description: "الرواية الثانية - الأيام الفاطمية", type: 'death' },
+    { month: 6, day: 3, title: "استشهاد السيدة فاطمة (ع)", description: "الرواية الثالثة - المشهورة", type: 'death' },
+    { month: 6, day: 20, title: "مولد السيدة فاطمة (ع)", description: "ذكرى مولد سيدة نساء العالمين", type: 'birth' },
+    { month: 7, day: 1, title: "مولد الإمام الباقر (ع)", description: "ذكرى مولد باقر علم النبيين", type: 'birth' },
+    { month: 7, day: 3, title: "استشهاد الإمام الهادي (ع)", description: "ذكرى استشهاد الإمام علي الهادي", type: 'death' },
+    { month: 7, day: 10, title: "مولد الإمام الجواد (ع)", description: "ذكرى مولد الإمام محمد الجواد", type: 'birth' },
     { month: 7, day: 13, title: "مولد الإمام علي (ع)", description: "ذكرى مولد أمير المؤمنين في الكعبة", type: 'birth' },
     { month: 7, day: 15, title: "وفاة السيدة زينب (ع)", description: "ذكرى وفاة عقيلة بني هاشم", type: 'death' },
-    { month: 7, day: 18, title: "وفاة إبراهيم بن الرسول الأكرم", description: "وفاة إبراهيم ابن النبي محمد (صلى الله عليه وآله وسلم)", type: 'death' },
     { month: 7, day: 25, title: "استشهاد الإمام الكاظم (ع)", description: "ذكرى استشهاد الإمام موسى بن جعفر عليه السلام", type: 'death' },
     { month: 7, day: 27, title: "الإسراء والمعراج", description: "ذكرى عروج النبي صلى الله عليه وآله", type: 'holy' },
     { month: 8, day: 3, title: "مولد الإمام الحسين (ع)", description: "ذكرى مولد سيد الشهداء", type: 'birth' },
+    { month: 8, day: 4, title: "مولد أبي الفضل العباس (ع)", description: "ذكرى مولد قمر بني هاشم", type: 'birth' },
+    { month: 8, day: 5, title: "مولد الإمام السجاد (ع)", description: "ذكرى مولد زين العابدين", type: 'birth' },
+    { month: 8, day: 11, title: "مولد علي الأكبر (ع)", description: "ذكرى مولد شبيه المصطفى", type: 'birth' },
     { month: 8, day: 15, title: "مولد الإمام المهدي (عج)", description: "النصف من شعبان", type: 'birth' },
     { month: 9, day: 1, title: "بداية شهر رمضان", description: "شهر الصيام والقرآن", type: 'holy' },
+    { month: 9, day: 10, title: "وفاة السيدة خديجة (ع)", description: "ذكرى رحيل أم المؤمنين", type: 'death' },
     { month: 9, day: 15, title: "مولد الإمام الحسن (ع)", description: "ذكرى مولد كريم أهل البيت", type: 'birth' },
-    { month: 9, day: 19, title: "ضربة الإمام علي عليه السلام", description: "في محراب الكوفة", type: 'death' },
-    { month: 9, day: 21, title: "استشهاد الإمام علي عليه السلام", description: "ذكرى استشهاد أمير المؤمنين", type: 'death' },
+    { month: 9, day: 17, title: "معركة بدر الكبرى", description: "أول معركة فاصلة في الإسلام", type: 'battle' },
+    { month: 9, day: 19, title: "ضربة الإمام علي (ع)", description: "في محراب الكوفة", type: 'death' },
+    { month: 9, day: 21, title: "استشهاد الإمام علي (ع)", description: "ذكرى استشهاد أمير المؤمنين", type: 'death' },
+    { month: 9, day: 23, title: "ليلة القدر الثالثة", description: "أرجى الليالي لأن تكون ليلة القدر", type: 'holy' },
     { month: 10, day: 1, title: "عيد الفطر المبارك", description: "أول أيام عيد الفطر", type: 'holy' },
+    { month: 10, day: 25, title: "استشهاد الإمام الصادق (ع)", description: "ذكرى استشهاد مؤسس المذهب الجعفري", type: 'death' },
+    { month: 11, day: 1, title: "مولد السيدة معصومة (ع)", description: "بداية عشرة الكرامة", type: 'birth' },
     { month: 11, day: 11, title: "مولد الإمام الرضا (ع)", description: "ذكرى مولد غريب طوس", type: 'birth' },
+    { month: 11, day: 29, title: "استشهاد الإمام الجواد (ع)", description: "ذكرى استشهاد الإمام محمد الجواد", type: 'death' },
     { month: 12, day: 1, title: "زواج النورين", description: "زواج الإمام علي والسيدة فاطمة", type: 'holy' },
+    { month: 12, day: 7, title: "استشهاد الإمام الباقر (ع)", description: "ذكرى استشهاد باقر علوم الأولين والآخرين", type: 'death' },
+    { month: 12, day: 9, title: "يوم عرفة", description: "ركن الحج الأعظم", type: 'holy' },
     { month: 12, day: 10, title: "عيد الأضحى المبارك", description: "ذكرى تضحية نبي الله إبراهيم", type: 'holy' },
+    { month: 12, day: 15, title: "مولد الإمام الهادي (ع)", description: "ذكرى مولد الإمام علي الهادي", type: 'birth' },
     { month: 12, day: 18, title: "عيد الغدير الأغر", description: "تنصيب الإمام علي عليه السلام خليفة", type: 'holy' },
+    { month: 12, day: 24, title: "يوم المباهلة", description: "مباهلة النبي مع نصارى نجران", type: 'holy' },
 ];
 
 /**
@@ -274,16 +296,30 @@ export default function Calendar() {
         const currentMonth = hijriDate.month.number;
         const currentDay = parseInt(hijriDate.day);
 
+        // Find all upcoming events in the current month and future months
         let events = ISLAMIC_EVENTS.filter(e => 
             (e.month === currentMonth && e.day >= currentDay) || 
             (e.month > currentMonth)
         ).sort((a, b) => (a.month * 100 + a.day) - (b.month * 100 + b.day));
 
+        // If no events left this year, take the first event of the next year
         if (events.length === 0) {
-            events = ISLAMIC_EVENTS.sort((a, b) => (a.month * 100 + a.day) - (b.month * 100 + b.day));
+            events = [...ISLAMIC_EVENTS].sort((a, b) => (a.month * 100 + a.day) - (b.month * 100 + b.day));
         }
 
-        return events[0];
+        const event = events[0];
+        if (!event) return null;
+
+        // Calculate days remaining (approximate)
+        let daysRemaining = 0;
+        if (event.month === currentMonth) {
+            daysRemaining = event.day - currentDay;
+        } else {
+            // Very simplified: assuming 30 days per month for the UI display
+            daysRemaining = (event.month - currentMonth) * 30 + (event.day - currentDay);
+        }
+
+        return { ...event, daysRemaining: Math.max(0, daysRemaining) };
     }, [hijriDate]);
 
     const weekdays = [
@@ -577,13 +613,19 @@ export default function Calendar() {
                     {nextEvent && (
                         <div className="bg-[#111] rounded-[2.5rem] p-8 md:p-10 border border-white/5">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                                <div className="space-y-4">
-                                    <h4 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-                                        {nextEvent.title}
-                                    </h4>
-                                    <p className="text-xl text-white/40 font-medium">
-                                        {nextEvent.day} {hijriMonths[nextEvent.month - 1]}
-                                    </p>
+                                <div className="flex flex-col md:flex-row md:items-center gap-8">
+                                    <div className="space-y-4">
+                                        <h4 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                                            {nextEvent.title}
+                                        </h4>
+                                        <p className="text-xl text-white/40 font-medium">
+                                            {nextEvent.day} {hijriMonths[nextEvent.month - 1]}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col items-start md:items-center justify-center bg-white/5 px-6 py-4 rounded-[2rem] border border-white/5">
+                                        <p className="text-4xl font-black text-primary">{(nextEvent as any).daysRemaining}</p>
+                                        <p className="text-xs font-bold text-white/20 uppercase tracking-widest">يوم متبقي</p>
+                                    </div>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <Button className="h-16 px-10 rounded-2xl bg-[#ea2e2e] hover:bg-[#ff3e3e] text-white font-bold text-xl shadow-lg shadow-[#ea2e2e]/20 transition-all active:scale-95">
