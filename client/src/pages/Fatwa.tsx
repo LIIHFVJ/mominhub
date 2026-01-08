@@ -2,10 +2,15 @@ import { useState } from "react";
 import { AIChatBox, type Message } from "@/components/AIChatBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, Lock, LogIn } from "lucide-react";
 import { AuthReminder } from "@/components/AuthReminder";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export default function Fatwa() {
+    const { isAuthenticated, signInWithGoogle } = useAuth();
     const [messages, setMessages] = useState<Message[]>([
         { role: "system", content: "أنت مساعد فقهي ذكي." },
         { role: "assistant", content: "مرحباً بك في رفيق المؤمن. أنا مساعدك الذكي للإجابة على الأسئلة الفقهية. يمكنك اختيار المذهب (سني/شيعي) للحصول على إجابة أكثر دقة." }
@@ -15,6 +20,11 @@ export default function Fatwa() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSendMessage = async (content: string) => {
+        if (!isAuthenticated) {
+            toast.error("يرجى تسجيل الدخول أولاً لاستخدام هذه الميزة");
+            signInWithGoogle();
+            return;
+        }
         // Add user message immediately
         setMessages((prev) => [...prev, { role: "user", content }]);
         setIsLoading(true);
@@ -74,12 +84,34 @@ export default function Fatwa() {
                 </AlertDescription>
             </Alert>
 
-            <div className="h-[600px] border rounded-xl overflow-hidden shadow-sm bg-background">
+            <div className="h-[600px] border rounded-xl overflow-hidden shadow-sm bg-background relative">
+                {!isAuthenticated ? (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/60 backdrop-blur-md p-6 text-center">
+                        <Card className="max-w-md p-8 border-primary/20 shadow-xl bg-card/50">
+                            <div className="mb-6 inline-flex p-4 bg-primary/10 rounded-full">
+                                <Lock className="w-12 h-12 text-primary" />
+                            </div>
+                            <h2 className="text-2xl font-bold mb-4">هذه الميزة تتطلب تسجيل الدخول</h2>
+                            <p className="text-muted-foreground mb-8 leading-relaxed">
+                                للحصول على استشارة فقهية مخصصة وحفظ سجل محادثاتك، يرجى تسجيل الدخول أولاً.
+                            </p>
+                            <Button 
+                                onClick={() => signInWithGoogle()} 
+                                size="lg" 
+                                className="w-full gap-2 text-lg h-12"
+                            >
+                                <LogIn className="w-5 h-5" />
+                                تسجيل الدخول للمتابعة
+                            </Button>
+                        </Card>
+                    </div>
+                ) : null}
+
                 <AIChatBox
                     messages={messages}
                     onSendMessage={handleSendMessage}
                     isLoading={isLoading}
-                    placeholder="اكتب سؤالك الفقهي هنا..."
+                    placeholder={isAuthenticated ? "اكتب سؤالك الفقهي هنا..." : "يرجى تسجيل الدخول أولاً..."}
                     suggestedPrompts={[
                         "ما حكم الصلاة في السفر؟",
                         "كيفية حساب زكاة الفطر؟",
