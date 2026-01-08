@@ -107,8 +107,17 @@ export const books = pgTable("books", {
   coverUrl: text("cover_url"),
   fileUrl: text("file_url").notNull(),
   isFeatured: integer("is_featured").default(0).notNull(),
+  bookType: text("book_type").default("reading").notNull(), // 'reading' or 'download'
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const pageViews = pgTable("page_views", {
+  id: uuid("id").primaryKey().default(sql`uuid_generate_v4()`),
+  path: text("path").notNull(),
+  userAgent: text("user_agent"),
+  ipHash: text("ip_hash"), // For unique visitor counting without storing actual IP
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export type QuranBookmark = typeof quranBookmarks.$inferSelect;

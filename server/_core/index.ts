@@ -57,6 +57,7 @@ export async function createApp() {
   registerOAuthRoutes(app);
 
   app.post("/api/fatwa", async (req, res) => {
+    console.log("[Fatwa API] Received request:", req.body);
     try {
       const { question, context } = req.body;
       if (!question) {
@@ -65,10 +66,11 @@ export async function createApp() {
       const answer = await askGemini(question, context);
       res.json({ answer });
     } catch (error: any) {
-      console.error("Fatwa API Error:", error);
+      console.error("Fatwa API Error Details:", error);
       const isProd = process.env.NODE_ENV === "production";
       res.status(500).json({ 
-        error: isProd ? "حدث خطأ في الخادم" : `خطأ: ${error.message}` 
+        error: isProd ? "حدث خطأ في الخادم" : `خطأ: ${error.message}`,
+        details: isProd ? undefined : error.stack
       });
     }
   });

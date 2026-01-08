@@ -10,6 +10,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 export default function Library() {
     const [books, setBooks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeBookType, setActiveBookType] = useState("reading");
 
     useEffect(() => {
         async function fetchBooks() {
@@ -30,9 +31,10 @@ export default function Library() {
         fetchBooks();
     }, []);
 
-    // Filter books by category
-    const shiaBooks = books.filter(b => b.category === "shia");
-    const sunniBooks = books.filter(b => b.category === "sunni");
+    // Filter books by category and type
+    const filteredBooks = books.filter(b => (b.book_type || "reading") === activeBookType);
+    const shiaBooks = filteredBooks.filter(b => b.category === "shia");
+    const sunniBooks = filteredBooks.filter(b => b.category === "sunni");
 
     return (
     <div className="container mx-auto p-6 space-y-8 animate-in fade-in duration-500">
@@ -45,6 +47,23 @@ export default function Library() {
                     مجموعة من الكتب والمصادر الإسلامية (ملفات PDF) جاهزة للقراءة والتحميل.
                 </p>
             </header>
+
+            <div className="flex justify-center mb-6">
+                <div className="inline-flex p-1 bg-muted rounded-xl border">
+                    <button
+                        onClick={() => setActiveBookType("reading")}
+                        className={`px-6 py-2 rounded-lg transition-all ${activeBookType === 'reading' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted-foreground/10'}`}
+                    >
+                        كتب للقراءة
+                    </button>
+                    <button
+                        onClick={() => setActiveBookType("download")}
+                        className={`px-6 py-2 rounded-lg transition-all ${activeBookType === 'download' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted-foreground/10'}`}
+                    >
+                        كتب للتحميل
+                    </button>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">

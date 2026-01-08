@@ -53,7 +53,8 @@ export default function Admin() {
         favorites: 0,
         totalTasbeeh: 0,
         totalQuran: 0,
-        activeUsers: 0
+        activeUsers: 0,
+        totalViews: 0
     });
     const [booksList, setBooksList] = useState<any[]>([]);
     const [adhkarList, setAdhkarList] = useState<any[]>([]);
@@ -87,7 +88,8 @@ export default function Admin() {
         file_url: "",
         cover_url: "",
         description: "",
-        isFeatured: 0 // تأكد من أنها 0 افتراضياً وليست null
+        isFeatured: 0, // تأكد من أنها 0 افتراضياً وليست null
+        book_type: "reading"
     });
 
     // Files state
@@ -132,6 +134,7 @@ export default function Admin() {
             const { count: usersCount, error: usersError } = await supabase.from('users').select('*', { count: 'exact', head: true });
             const { count: booksCount, error: booksError } = await supabase.from('books').select('*', { count: 'exact', head: true });
             const { count: favoritesCount, error: favoritesError } = await supabase.from('favorites').select('*', { count: 'exact', head: true });
+            const { count: viewsCount } = await supabase.from('page_views').select('*', { count: 'exact', head: true });
 
             if (usersError) console.error("Admin: Users fetch error:", usersError);
             if (booksError) console.error("Admin: Books fetch error:", booksError);
@@ -159,7 +162,8 @@ export default function Admin() {
                 favorites: favoritesCount || 0,
                 totalTasbeeh,
                 totalQuran,
-                activeUsers: activeUsersCount
+                activeUsers: activeUsersCount,
+                totalViews: viewsCount || 0
             });
         } catch (e) {
             console.error("Admin: fetchStats exception:", e);
@@ -320,7 +324,8 @@ export default function Admin() {
                     author: editingBook.author,
                     category: editingBook.category,
                     description: editingBook.description,
-                    is_featured: (editingBook.is_featured ?? editingBook.isFeatured ?? 0), // التحقق من كلا الاسمين
+                    is_featured: (editingBook.isFeatured !== undefined ? editingBook.isFeatured : (editingBook.is_featured ?? 0)),
+                    book_type: editingBook.book_type || 'reading',
                     file_url: finalFileUrl,
                     cover_url: finalCoverUrl
                 })
@@ -400,9 +405,9 @@ export default function Admin() {
             throw new Error("يجب تسجيل الدخول مرة أخرى للقيام بهذه العملية.");
         }
 
-        // التحقق من حجم الملف (الحد الأقصى 50 ميجابايت لمشتركين سوبابيس المجانيين)
-        if (file.size > 50 * 1024 * 1024) {
-            throw new Error("حجم الملف كبير جداً. الحد الأقصى هو 50 ميجابايت.");
+        // التحقق من حجم الملف (الحد الأقصى الافتراضي لسوبابيس هو 50 ميجابايت)
+        if (file.size > 100 * 1024 * 1024) {
+            throw new Error("حجم الملف كبير جداً (أكبر من 100 ميجابايت). يرجى رفع الملف على موقع خارجي ووضع الرابط المباشر.");
         }
 
         // تحديد نوع المحتوى يدوياً لضمان قبوله من قبل السيرفر
@@ -497,6 +502,7 @@ export default function Admin() {
                 category: newBook.category,
                 description: newBook.description,
                 is_featured: newBook.isFeatured ?? 0, // استخدام Nullish coalescing لضمان عدم إرسال null
+                book_type: newBook.book_type || 'reading',
                 file_url: finalFileUrl,
                 cover_url: finalCoverUrl
             }]);
@@ -520,7 +526,7 @@ export default function Admin() {
     };
 
     const resetForm = () => {
-        setNewBook({ title: "", author: "", category: "shia", file_url: "", cover_url: "", description: "", isFeatured: 0 });
+        setNewBook({ title: "", author: "", category: "shia", file_url: "", cover_url: "", description: "", isFeatured: 0, book_type: "reading" });
         setPdfFile(null);
         setCoverFile(null);
     };
@@ -616,6 +622,18 @@ export default function Admin() {
                                         <h3 className="text-3xl font-bold mt-2">{stats.books}</h3>
                                     </div>
                                     <BookOpen className="w-8 h-8 text-emerald-500 opacity-20" />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-none">
+                            <CardContent className="pt-6">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">إجمالي الزيارات (الكل)</p>
+                                        <h3 className="text-3xl font-bold mt-2">{stats.totalViews}</h3>
+                                    </div>
+                                    <Eye className="w-8 h-8 text-purple-500 opacity-20" />
                                 </div>
                             </CardContent>
                         </Card>
@@ -776,6 +794,21 @@ export default function Admin() {
                                                     placeholder="مثلاً: الشريف الرضي"
                                                 />
                                             </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-right block">قسم الكتاب</Label>
+                                                <Select
+                                                    value={newBook.book_type}
+                                                    onValueChange={(val: string) => setNewBook({ ...newBook, book_type: val })}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="اختر قسم الكتاب" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="reading">كتب للقراءة (PDF)</SelectItem>
+                                                        <SelectItem value="download">كتب للتحميل (روابط)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-2">
@@ -806,7 +839,9 @@ export default function Admin() {
                                                     onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
                                                     className="bg-background cursor-pointer"
                                                 />
-                                                <p className="text-[10px] text-muted-foreground mr-1">أو ضع رابطاً مباشراً بالأسفل إذا كان الملف مرفوعاً مسبقاً</p>
+                                                <p className="text-[10px] text-muted-foreground mr-1">
+                                                    الحد الأقصى 50 ميجابايت. إذا كان الملف أكبر، يرجى وضعه في Google Drive أو Archive.org ووضع الرابط المباشر هنا:
+                                                </p>
                                                 <Input
                                                     value={newBook.file_url}
                                                     onChange={(e) => setNewBook({ ...newBook, file_url: e.target.value })}
@@ -945,20 +980,37 @@ export default function Admin() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label className="text-right block">التصنيف</Label>
-                                        <Select
-                                            value={editingBook.category}
-                                            onValueChange={(val: string) => setEditingBook({ ...editingBook, category: val })}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="shia">كتب الشيعة</SelectItem>
-                                                <SelectItem value="sunni">كتب أهل السنة</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-right block">التصنيف</Label>
+                                            <Select
+                                                value={editingBook.category}
+                                                onValueChange={(val: string) => setEditingBook({ ...editingBook, category: val })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="shia">كتب الشيعة</SelectItem>
+                                                    <SelectItem value="sunni">كتب أهل السنة</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-right block">قسم الكتاب</Label>
+                                            <Select
+                                                value={editingBook.book_type || 'reading'}
+                                                onValueChange={(val: string) => setEditingBook({ ...editingBook, book_type: val })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="reading">كتب للقراءة (PDF)</SelectItem>
+                                                    <SelectItem value="download">كتب للتحميل (روابط)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">
@@ -1004,8 +1056,8 @@ export default function Admin() {
                                         <input
                                             type="checkbox"
                                             id="edit-isFeatured"
-                                            checked={editingBook.isFeatured === 1}
-                                            onChange={(e) => setEditingBook({ ...editingBook, isFeatured: e.target.checked ? 1 : 0 })}
+                                            checked={editingBook.is_featured === 1 || editingBook.isFeatured === 1}
+                                            onChange={(e) => setEditingBook({ ...editingBook, is_featured: e.target.checked ? 1 : 0, isFeatured: e.target.checked ? 1 : 0 })}
                                             className="w-4 h-4 text-primary"
                                         />
                                         <Label htmlFor="edit-isFeatured" className="cursor-pointer">تمييز هذا الكتاب (يظهر في القسم المميز)</Label>

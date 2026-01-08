@@ -46,13 +46,25 @@ export default function Fatwa() {
                     { role: "assistant", content: data.answer },
                 ]);
             } else {
-                throw new Error(data.error || 'Failed to fetch');
+                // If it's a rate limit error or other structured error
+                const errorText = data.error || data.message || `Error ${response.status}`;
+                throw new Error(errorText);
             }
-        } catch (error) {
-            console.error(error);
+        } catch (error: any) {
+            console.error("Fatwa Page Error:", error);
+            let userFriendlyMessage = "عذراً، حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
+            
+            if (error.message.includes("Failed to fetch")) {
+                userFriendlyMessage = "تعذر الاتصال بالخادم. يرجى التأكد من تشغيل الخادم الخلفي (Backend) وتحديث الصفحة.";
+            } else if (error.message.includes("تجاوزت الحد المسموح")) {
+                userFriendlyMessage = "لقد تجاوزت الحد المسموح به من الطلبات حالياً. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.";
+            } else {
+                userFriendlyMessage = `عذراً، حدث خطأ: ${error.message}`;
+            }
+
             setMessages((prev) => [
                 ...prev,
-                { role: "assistant", content: "عذراً، حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى." },
+                { role: "assistant", content: userFriendlyMessage },
             ]);
         } finally {
             setIsLoading(false);

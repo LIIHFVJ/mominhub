@@ -35,31 +35,48 @@ export async function askGemini(question: string, context?: 'sunni' | 'shia'): P
     }
 
     try {
-        // Using gemini-2.5-flash-lite as requested by user (Free/Lite version)
-        const model = ai.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+        // List of models to try in order of preference
+        const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+        let lastError: any = null;
+        let successfulText: string | null = null;
 
-        console.log(`[Gemini] Attempting connection using model: gemini-2.5-flash-lite...`);
+        for (const modelName of modelsToTry) {
+            try {
+                console.log(`[Gemini] Attempting connection using model: ${modelName}...`);
+                const model = ai.getGenerativeModel({ model: modelName });
 
-        let contextPrompt = "";
-        if (context === 'shia') {
-            contextPrompt = "أجب وفق المذهب الجعفري (الشيعي) بالاعتماد على المصادر الشيعية المعتبرة.";
-        } else if (context === 'sunni') {
-            contextPrompt = "أجب وفق مذهب أهل السنة والجماعة بالاعتماد على المصادر السنية المعتبرة.";
-        }
+                let contextPrompt = "";
+                if (context === 'shia') {
+                    contextPrompt = "أجب وفق المذهب الجعفري (الشيعي) بالاعتماد على المصادر الشيعية المعتبرة.";
+                } else if (context === 'sunni') {
+                    contextPrompt = "أجب وفق مذهب أهل السنة والجماعة بالاعتماد على المصادر السنية المعتبرة.";
+                }
 
-        const prompt = `أنت مساعد إسلامي متخصص في منصة "رفيق المؤمن". سألك أحد المستخدمين: "${question}". ${contextPrompt}
+                const prompt = `أنت مساعد إسلامي متخصص في منصة "رفيق المؤمن". سألك أحد المستخدمين: "${question}". ${contextPrompt}
 يجب الالتزام بالقواعد التالية:
 1. **الأمانة العلمية**: اعتمد على القرآن والسنة ومصادر التشريع الأساسية.
 2. **الحذر من الفتوى**: لا تحلل ولا تحرم من عندك في مسائل لا تملك فيها دليلاً شرعياً صريحاً. إذا لم تجد إجابة مباشرة، قل بوضوح: "هذه المسألة تحتاج لاستشارة مختص" أو "لا علم لي".
 3. **الأسلوب**: أجب بلغة عربية فصحى ميسرة ومهذبة.`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                successfulText = response.text();
+                
+                if (successfulText) {
+                    console.log(`[Gemini] Success with model: ${modelName}`);
+                    break;
+                }
+            } catch (e: any) {
+                console.warn(`[Gemini] Model ${modelName} failed: ${e.message}`);
+                lastError = e;
+                // Continue to next model
+            }
+        }
 
-        if (!text) throw new Error("Empty response from AI");
-
-        return text;
+        if (successfulText) return successfulText;
+        if (lastError) throw lastError;
+        
+        throw new Error("All models failed to respond");
     } catch (error: any) {
         console.error(`[Gemini Error Details] Message: ${error.message}, Status: ${error.status}`);
 
@@ -70,7 +87,7 @@ export async function askGemini(question: string, context?: 'sunni' | 'shia'): P
         }
         
         if (errorMessage.includes("model not found") || errorMessage.includes("404")) {
-            return "خطأ: طراز الذكاء الاصطناعي (gemini-2.5-flash-lite) غير متوفر حالياً. يرجى مراجعة إعدادات الطراز.";
+            return `خطأ: طراز الذكاء الاصطناعي (gemini-1.5-flash) غير متوفر حالياً لهذا المفتاح. يرجى التأكد من تفعيل Gemini API في Google Cloud Console أو استخدام مفتاح صالح من Google AI Studio.`;
         }
 
         if (errorMessage.includes("quota") || errorMessage.includes("429")) {

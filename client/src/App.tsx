@@ -25,6 +25,7 @@ import { Home as HomeIcon, BookOpen, Sparkles, User, Settings as SettingsIcon, M
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "./components/Logo";
+import { supabase } from "@/lib/supabase";
 
 function MobileNav() {
   const { user, signInWithGoogle } = useAuth();
@@ -196,6 +197,27 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    const trackView = async () => {
+      try {
+        // نكتفي بالتسجيل في صمت، إذا لم يكن الجدول موجوداً لن يحدث خطأ يعطل التطبيق
+        await supabase.from('page_views').insert([
+          {
+            path: location,
+            user_agent: navigator.userAgent,
+            // يمكن إضافة المزيد من البيانات هنا مستقبلاً
+          }
+        ]);
+      } catch (e) {
+        // تجاهل الخطأ في حالة عدم وجود الجدول
+      }
+    };
+
+    trackView();
+  }, [location]);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
