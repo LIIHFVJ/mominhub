@@ -54,6 +54,13 @@ const ISLAMIC_EVENTS: HijriEvent[] = [
     { month: 12, day: 18, title: "عيد الغدير الأغر", description: "تنصيب الإمام علي عليه السلام خليفة", type: 'holy' },
 ];
 
+// Aladhan API Endpoints
+const API_BASE_URL = "https://api.aladhan.com/v1";
+const API_BACKUP_URLS = [
+    "https://alislam.api.islamic.network/v1",
+    "https://aladhan.api.alislam.ru/v1"
+];
+
 interface HijriDateInfo {
     day: string;
     month: {
@@ -89,7 +96,7 @@ export default function Calendar() {
             const dateStr = format(date, "dd-MM-yyyy");
             
             // Get Hijri info for the requested date
-            const todayRes = await fetch(`https://api.aladhan.com/v1/gToH/${dateStr}`);
+            const todayRes = await fetch(`${API_BASE_URL}/gToH/${dateStr}`);
             const todayData = await todayRes.json();
             
             if (todayData.code === 200) {
@@ -106,7 +113,7 @@ export default function Calendar() {
 
                 // Fetch the full Hijri month calendar
                 const calendarRes = await fetch(
-                    `https://api.aladhan.com/v1/hijriCalendar/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
+                    `${API_BASE_URL}/hijriCalendar/${hYear}/${hMonth}?city=${city}&country=${country}&method=${method}`
                 );
                 const calendarData = await calendarRes.json();
                 
@@ -157,7 +164,7 @@ export default function Calendar() {
             const method = preferences?.calculation_method || 4;
 
             const calendarRes = await fetch(
-                `https://api.aladhan.com/v1/hijriCalendar/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
+                `${API_BASE_URL}/hijriCalendar/${nextHYear}/${nextHMonth}?city=${city}&country=${country}&method=${method}`
             );
             const calendarData = await calendarRes.json();
             
@@ -190,7 +197,7 @@ export default function Calendar() {
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
             
-            const res = await fetch(`https://api.aladhan.com/v1/gToH/${day}-${month}-${year}`);
+            const res = await fetch(`${API_BASE_URL}/gToH/${day}-${month}-${year}`);
             const data = await res.json();
             if (data.code === 200) {
                 setConvertedResult({ type: 'hijri', data: data.data.hijri });
@@ -207,7 +214,7 @@ export default function Calendar() {
             return;
         }
         try {
-            const res = await fetch(`https://api.aladhan.com/v1/hToG/${day}-${month}-${year}`);
+            const res = await fetch(`${API_BASE_URL}/hToG/${day}-${month}-${year}`);
             const data = await res.json();
             if (data.code === 200) {
                 setConvertedResult({ type: 'gregorian', data: data.data.gregorian });
