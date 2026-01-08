@@ -193,6 +193,10 @@ export default function Calendar() {
         }
     };
 
+    const goToToday = () => {
+        setCurrentDate(new Date());
+    };
+
     const handleMonthChange = async (direction: 'next' | 'prev') => {
         if (!hijriDate) return;
         
@@ -287,8 +291,22 @@ export default function Calendar() {
         setCurrentDate(prev);
     };
 
-    const goToToday = () => {
-        setCurrentDate(new Date());
+    const handleShareEvent = (event: any) => {
+        const text = `المناسبة القادمة: ${event.title}\nالتاريخ: ${event.day} ${hijriMonths[event.month - 1]}\nمتبقي: ${event.daysRemaining} يوم\n\nتمت المشاركة عبر تطبيق رفيق المؤمن`;
+        if (navigator.share) {
+            navigator.share({
+                title: 'رفيق المؤمن - المناسبات الإسلامية',
+                text: text,
+                url: window.location.href,
+            }).catch(() => {
+                // Fallback for copy
+                navigator.clipboard.writeText(text);
+                toast.success("تم نسخ تفاصيل المناسبة");
+            });
+        } else {
+            navigator.clipboard.writeText(text);
+            toast.success("تم نسخ تفاصيل المناسبة");
+        }
     };
 
     const nextEvent = useMemo(() => {
@@ -628,11 +646,18 @@ export default function Calendar() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <Button className="h-16 px-10 rounded-2xl bg-[#ea2e2e] hover:bg-[#ff3e3e] text-white font-bold text-xl shadow-lg shadow-[#ea2e2e]/20 transition-all active:scale-95">
+                                    <Button 
+                                        onClick={() => toast.info("ميزة التذكير ستتوفر قريباً إن شاء الله")}
+                                        className="h-16 px-10 rounded-2xl bg-[#ea2e2e] hover:bg-[#ff3e3e] text-white font-bold text-xl shadow-lg shadow-[#ea2e2e]/20 transition-all active:scale-95"
+                                    >
                                         <Bell className="w-6 h-6 ml-3" />
                                         اضافة تذكير
                                     </Button>
-                                    <Button variant="outline" className="h-16 w-16 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all active:scale-95">
+                                    <Button 
+                                        onClick={() => handleShareEvent(nextEvent)}
+                                        variant="outline" 
+                                        className="h-16 w-16 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all active:scale-95"
+                                    >
                                         <Share2 className="w-8 h-8" />
                                     </Button>
                                 </div>

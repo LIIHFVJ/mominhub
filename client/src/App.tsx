@@ -24,6 +24,7 @@ import { AppSidebar } from "./components/AppSidebar";
 import { Home as HomeIcon, BookOpen, Sparkles, User, Settings as SettingsIcon, Menu, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Logo } from "./components/Logo";
 
 function MobileNav() {
   const { user, signInWithGoogle } = useAuth();
@@ -139,7 +140,12 @@ function TopHeader() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 md:px-6">
-      <SidebarTrigger className="md:flex" />
+      <div className="flex items-center gap-4">
+        <SidebarTrigger className="md:flex" />
+        <div className="hidden lg:block">
+          <Logo className="w-9 h-9" textClassName="text-xl" />
+        </div>
+      </div>
       
       <div className="flex-1 flex items-center justify-between">
         <h1 className="text-lg font-bold text-primary md:text-xl">{getPageTitle()}</h1>

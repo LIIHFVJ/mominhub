@@ -31,6 +31,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Logo } from "./Logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,12 +74,9 @@ export function AppSidebar() {
   return (
     <Sidebar side="right" variant="sidebar" collapsible="icon" className="border-l border-border">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3 px-2 py-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Sparkles className="h-5 w-5" />
-          </div>
+        <div className="flex items-center gap-3 px-2 py-1 overflow-hidden">
+          <Logo className="w-9 h-9 flex-shrink-0" textClassName="text-xl group-data-[collapsible=icon]:hidden" />
           <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-            <span className="font-bold text-lg text-primary">رفيق المؤمن</span>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">المنصة الإسلامية الشاملة</span>
           </div>
         </div>

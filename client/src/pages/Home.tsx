@@ -21,6 +21,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { BookMarked, ArrowLeft } from "lucide-react";
 import { AuthReminder } from "@/components/AuthReminder";
+import { Logo } from "@/components/Logo";
 
 export default function Home() {
   const { user, signInWithGoogle } = useAuth();
@@ -204,6 +205,9 @@ export default function Home() {
         </div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="mb-8 flex justify-center">
+            <Logo className="w-24 h-24" textClassName="hidden" />
+          </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent leading-tight">
             رفيق المؤمن
           </h1>
