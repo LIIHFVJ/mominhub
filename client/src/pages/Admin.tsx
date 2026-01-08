@@ -87,7 +87,7 @@ export default function Admin() {
         file_url: "",
         cover_url: "",
         description: "",
-        isFeatured: 0
+        isFeatured: 0 // تأكد من أنها 0 افتراضياً وليست null
     });
 
     // Files state
@@ -320,7 +320,7 @@ export default function Admin() {
                     author: editingBook.author,
                     category: editingBook.category,
                     description: editingBook.description,
-                    is_featured: editingBook.isFeatured,
+                    is_featured: (editingBook.is_featured ?? editingBook.isFeatured ?? 0), // التحقق من كلا الاسمين
                     file_url: finalFileUrl,
                     cover_url: finalCoverUrl
                 })
@@ -389,18 +389,49 @@ export default function Admin() {
     };
 
     const uploadFile = async (file: File | Blob, folder: string, originalName?: string) => {
-        const fileExt = originalName ? originalName.split('.').pop() : (file instanceof File ? file.name.split('.').pop() : 'jpg');
+        const fileExt = originalName ? originalName.split('.').pop() : (file instanceof File ? file.name.split('.').pop() : 'pdf');
         const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
         const filePath = `${folder}/${fileName}`;
 
-        const { error } = await supabase.storage
+        // التأكد من تسجيل الدخول
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+            console.error("No active session found during upload");
+            throw new Error("يجب تسجيل الدخول مرة أخرى للقيام بهذه العملية.");
+        }
+
+        // التحقق من حجم الملف (الحد الأقصى 50 ميجابايت لمشتركين سوبابيس المجانيين)
+        if (file.size > 50 * 1024 * 1024) {
+            throw new Error("حجم الملف كبير جداً. الحد الأقصى هو 50 ميجابايت.");
+        }
+
+        // تحديد نوع المحتوى يدوياً لضمان قبوله من قبل السيرفر
+        let contentType = 'application/octet-stream';
+        if (fileExt?.toLowerCase() === 'pdf') {
+            contentType = 'application/pdf';
+        } else if (['jpg', 'jpeg', 'png', 'webp'].includes(fileExt?.toLowerCase() || '')) {
+            contentType = `image/${fileExt?.toLowerCase() === 'jpg' ? 'jpeg' : fileExt?.toLowerCase()}`;
+        }
+
+        console.log(`Uploading to Supabase: ${filePath} (${contentType})`);
+
+        const { error, data } = await supabase.storage
             .from('books')
             .upload(filePath, file, {
                 cacheControl: '3600',
-                upsert: false
+                upsert: true, // تغيير إلى true لتجنب مشاكل التكرار
+                contentType: contentType // تحديد نوع الملف يدوياً
             });
 
-        if (error) throw error;
+        if (error) {
+            console.error("Supabase Storage Upload Error Details:", {
+                error,
+                message: error.message,
+                name: error.name,
+                status: (error as any).status
+            });
+            throw new Error(`فشل رفع الملف: ${error.message}`);
+        }
 
         const { data: { publicUrl } } = supabase.storage
             .from('books')
@@ -440,6 +471,9 @@ export default function Admin() {
             let finalCoverUrl = newBook.cover_url;
 
             if (pdfFile) {
+                if (pdfFile.size === 0) {
+                    throw new Error("ملف PDF فارغ أو تالف.");
+                }
                 toast.info("جاري رفع ملف الكتاب...");
                 finalFileUrl = await uploadFile(pdfFile, 'pdfs');
             }
@@ -450,17 +484,27 @@ export default function Admin() {
                 finalCoverUrl = await uploadFile(compressedCover, 'covers', coverFile.name);
             }
 
+            console.log("Saving book to database:", {
+                title: newBook.title,
+                is_featured: newBook.isFeatured ?? 0,
+                file_url: finalFileUrl,
+                cover_url: finalCoverUrl
+            });
+
             const { error } = await supabase.from('books').insert([{
                 title: newBook.title,
                 author: newBook.author,
                 category: newBook.category,
                 description: newBook.description,
-                is_featured: newBook.isFeatured,
+                is_featured: newBook.isFeatured ?? 0, // استخدام Nullish coalescing لضمان عدم إرسال null
                 file_url: finalFileUrl,
                 cover_url: finalCoverUrl
             }]);
 
-            if (error) throw error;
+            if (error) {
+                console.error("Database Insert Error:", error);
+                throw new Error(`فشل حفظ بيانات الكتاب في قاعدة البيانات: ${error.message}`);
+            }
 
             toast.success("تم إضافة الكتاب وحفظ الملفات بنجاح");
             setIsAddModalOpen(false);
@@ -468,14 +512,15 @@ export default function Admin() {
             fetchBooks();
             fetchStats();
         } catch (error: any) {
-            toast.error("خطأ أثناء الرفع أو الحفظ: " + error.message);
+            console.error("Detailed Add Book Error:", error);
+            toast.error("خطأ: " + (error.message || "حدث خطأ غير متوقع أثناء الرفع"));
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const resetForm = () => {
-        setNewBook({ title: "", author: "", category: "shia", file_url: "", cover_url: "", description: "" });
+        setNewBook({ title: "", author: "", category: "shia", file_url: "", cover_url: "", description: "", isFeatured: 0 });
         setPdfFile(null);
         setCoverFile(null);
     };
