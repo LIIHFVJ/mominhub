@@ -1560,6 +1560,182 @@ export default function Admin() {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            {/* Edit Adhkar Dialog - Moved outside Tabs for accessibility from any tab */}
+            <Dialog open={isEditAdhkarOpen} onOpenChange={setIsEditAdhkarOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle className="text-right text-2xl font-bold">تعديل المحتوى</DialogTitle>
+                    </DialogHeader>
+                    {editingAdhkar && (
+                        <form onSubmit={handleUpdateAdhkar} className="space-y-4 py-4" dir="rtl">
+                            <div className="space-y-2">
+                                <Label className="text-right block">الفئة</Label>
+                                <Input
+                                    value={editingAdhkar.category}
+                                    onChange={(e) => setEditingAdhkar({ ...editingAdhkar, category: e.target.value })}
+                                    className="text-right"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-right block">المصدر</Label>
+                                <Input
+                                    value={editingAdhkar.source}
+                                    onChange={(e) => setEditingAdhkar({ ...editingAdhkar, source: e.target.value })}
+                                    className="text-right"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-right block">النص</Label>
+                                <textarea
+                                    className="w-full min-h-[150px] p-3 rounded-md border bg-background text-right font-arabic text-lg"
+                                    value={editingAdhkar.content}
+                                    onChange={(e) => setEditingAdhkar({ ...editingAdhkar, content: e.target.value })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-right block">النوع</Label>
+                                <Select
+                                    value={editingAdhkar.type}
+                                    onValueChange={(val: any) => setEditingAdhkar({ ...editingAdhkar, type: val })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                         <SelectItem value="adhkar">ذكر</SelectItem>
+                                         <SelectItem value="duaa">دعاء</SelectItem>
+                                         <SelectItem value="ziyarat">زيارة</SelectItem>
+                                         <SelectItem value="hadith">حديث</SelectItem>
+                                     </SelectContent>
+                                </Select>
+                            </div>
+
+                            <DialogFooter className="pt-4 gap-2">
+                                <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
+                                    {isSubmitting ? (
+                                        <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                    ) : (
+                                        "حفظ التغييرات"
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Book Dialog - Moved outside Tabs */}
+            <Dialog open={isEditBookOpen} onOpenChange={setIsEditBookOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle className="text-right text-2xl font-bold">تعديل الكتاب</DialogTitle>
+                    </DialogHeader>
+                    {editingBook && (
+                        <form onSubmit={handleUpdateBook} className="space-y-4 py-4" dir="rtl">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="edit-title" className="text-right block">عنوان الكتاب *</Label>
+                                    <Input
+                                        id="edit-title"
+                                        required
+                                        value={editingBook.title}
+                                        onChange={(e) => setEditingBook({ ...editingBook, title: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="edit-author" className="text-right block">المؤلف</Label>
+                                    <Input
+                                        id="edit-author"
+                                        value={editingBook.author}
+                                        onChange={(e) => setEditingBook({ ...editingBook, author: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-right block">التصنيف</Label>
+                                <Select
+                                    value={editingBook.category}
+                                    onValueChange={(val: string) => setEditingBook({ ...editingBook, category: val })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="shia">كتب الشيعة</SelectItem>
+                                        <SelectItem value="sunni">كتب أهل السنة</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-description" className="text-right block">وصف الكتاب</Label>
+                                <textarea
+                                    id="edit-description"
+                                    className="w-full min-h-[100px] p-3 rounded-md border bg-background text-right"
+                                    value={editingBook.description || ""}
+                                    onChange={(e) => setEditingBook({ ...editingBook, description: e.target.value })}
+                                    placeholder="اكتب وصفاً مختصراً للكتاب..."
+                                />
+                            </div>
+
+                            <div className="space-y-4 rounded-xl border-2 border-dashed p-4 bg-muted/30">
+                                <div className="space-y-2">
+                                    <Label className="text-right block font-bold text-primary flex items-center gap-2">
+                                        <FileText className="w-4 h-4" />
+                                        تغيير ملف الكتاب (PDF)
+                                    </Label>
+                                    <Input
+                                        type="file"
+                                        accept=".pdf"
+                                        onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                                        className="bg-background cursor-pointer"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-right block font-bold text-primary flex items-center gap-2">
+                                        <ImageIcon className="w-4 h-4" />
+                                        تغيير الغلاف (Image)
+                                    </Label>
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                                        className="bg-background cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 py-2">
+                                <input
+                                    type="checkbox"
+                                    id="edit-isFeatured"
+                                    checked={editingBook.is_featured === 1 || editingBook.isFeatured === 1}
+                                    onChange={(e) => setEditingBook({ ...editingBook, is_featured: e.target.checked ? 1 : 0, isFeatured: e.target.checked ? 1 : 0 })}
+                                    className="w-4 h-4 text-primary"
+                                />
+                                <Label htmlFor="edit-isFeatured" className="cursor-pointer">تمييز هذا الكتاب (يظهر في القسم المميز)</Label>
+                            </div>
+
+                            <DialogFooter className="pt-4 gap-2">
+                                <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-lg">
+                                    {isSubmitting ? (
+                                        <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                    ) : (
+                                        "حفظ التغييرات"
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
